@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for # pyright: ignore[reportMissingImports]
+from pymongo import MongoClient # pyright: ignore[reportMissingImports]
+from bson.objectid import ObjectId # pyright: ignore[reportMissingImports]
 from datetime import datetime, timedelta
-import bcrypt
+import bcrypt # pyright: ignore[reportMissingImports]
 
 app = Flask(__name__)
 app.secret_key = "my_super_secret_key_1234567890"
