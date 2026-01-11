@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PharmaCare - Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    /* Reset & Base */
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Roboto', sans-serif; }
+    body { background:#f5f5f5; color:#333; }
+
+    /* Navbar */
+    nav {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:15px 50px;
+        background:#0f766e;
+        color:#fff;
+        position:sticky;
+        top:0;
+        z-index:100;
+    }
+    nav h1 { font-size:28px; cursor:pointer; }
+    nav input {
+        padding:10px 15px;
+        border-radius:30px;
+        border:none;
+        outline:none;
+        width:250px;
+    }
+    nav .cart { position:relative; cursor:pointer; }
+    nav .cart span {
+        position:absolute;
+        top:-8px;
+        right:-10px;
+        background:#f87171;
+        color:#fff;
+        font-size:12px;
+        padding:3px 7px;
+        border-radius:50%;
+    }
+
+    /* Container & Grid */
+    .container { max-width:1200px; margin:40px auto; padding:0 20px; }
+    .medicine-grid {
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+        gap:25px;
+    }
+
+    /* Medicine Cards */
+    .medicine-card {
+        background:#fff;
+        border-radius:15px;
+        padding:20px;
+        text-align:center;
+        box-shadow:0 5px 20px rgba(0,0,0,0.1);
+        transition:0.3s;
+    }
+    .medicine-card:hover { transform:translateY(-5px); box-shadow:0 10px 25px rgba(0,0,0,0.15); }
+    .medicine-card h2 { margin-bottom:10px; font-size:20px; }
+    .medicine-card p { margin-bottom:10px; color:#555; }
+    .medicine-card .btn {
+        padding:10px 20px;
+        border:none;
+        border-radius:30px;
+        background:#0f766e;
+        color:#fff;
+        font-weight:500;
+        cursor:pointer;
+        transition:0.3s;
+    }
+    .medicine-card .btn:hover { background:#14b8a6; }
+
+    /* Cart Sidebar */
+    #cartSidebar {
+        position:fixed;
+        right:-400px;
+        top:0;
+        width:350px;
+        height:100%;
+        background:#fff;
+        padding:20px;
+        transition:right 0.3s ease;
+        z-index:200;
+        box-shadow:-5px 0 20px rgba(0,0,0,0.1);
+        overflow-y:auto;
+    }
+    #cartSidebar h2 { text-align:center; margin-bottom:20px; color:#0f766e; }
+    #cartSidebar ul { list-style:none; padding:0; }
+    #cartSidebar ul li { margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; }
+    #cartSidebar ul li button { background:#f87171; border:none; color:#fff; border-radius:5px; padding:3px 7px; cursor:pointer; }
+    #cartSidebar .close-cart { cursor:pointer; color:#f87171; font-weight:bold; float:right; font-size:18px; }
+
+    footer { text-align:center; padding:20px; background:#0f766e; color:#fff; margin-top:40px; }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+    <h1>💊 PharmaCare</h1>
+    <input type="text" placeholder="Search medicines..." id="searchInput">
+    <div class="cart" onclick="toggleCart()">
+        🛒 Cart <span id="cartCount">{{ cart|length }}</span>
+    </div>
+</nav>
+
+<!-- Medicines Grid -->
+<div class="container">
+    <div class="medicine-grid" id="medicineGrid">
+        {% for med in medicines %}
+        <div class="medicine-card">
+            <h2>{{ med.name }}</h2>
+            <p>Price: ${{ med.price }}</p>
+            <p>Available: {{ med.quantity }}</p>
+            {% if med.quantity > 0 %}
+            <button class="btn" onclick="addToCart('{{ med._id }}')">Add to Cart</button>
+            {% else %}
+            <button class="btn" disabled>Out of Stock</button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar">
+    <span class="close-cart" onclick="toggleCart()">✖</span>
+    <h2>Your Cart</h2>
+    <ul id="cartItems">
+        {% for item in cart %}
+        <li>
+            {{ item.name }} - ${{ item.price }} 
+            <button onclick="removeFromCart('{{ item.id }}')">Remove</button>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Footer -->
+<footer>
+    &copy; 2026 PharmaCare. All rights reserved.
+</footer>
+
+<script>
+function toggleCart() {
+    const cartSidebar = document.getElementById('cartSidebar');
+    cartSidebar.style.right = cartSidebar.style.right === "0px" ? "-400px" : "0px";
+}
+
+// Add medicine to cart via backend
+function addToCart(med_id) {
+    fetch("/user/add_to_cart", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({med_id})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.cart){
+            updateCartUI(data.cart);
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+// Remove medicine from cart via backend
+function removeFromCart(med_id) {
+    fetch("/user/remove_from_cart", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({med_id})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.cart){
+            updateCartUI(data.cart);
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+// Update cart UI dynamically
+function updateCartUI(cartData) {
+    const cartItems = document.getElementById('cartItems');
+    const cartCount = document.getElementById('cartCount');
+    cartItems.innerHTML = "";
+    cartData.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `${item.name} - $${item.price} <button onclick="removeFromCart('${item.id}')">Remove</button>`;
+        cartItems.appendChild(li);
+    });
+    cartCount.textContent = cartData.length;
+}
+
+// Search filter
+document.getElementById('searchInput').addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('.medicine-card').forEach(card => {
+        const text = card.querySelector('h2').textContent.toLowerCase();
+        card.style.display = text.includes(filter) ? 'block' : 'none';
+    });
+});
+</script>
+
+</body>
+</html>

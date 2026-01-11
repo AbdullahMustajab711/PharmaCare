@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard - PharmaCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    :root {
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --primary-dark: #115e59;
+        --bg-body: #f1f5f9;
+        --bg-surface: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gold: #fbbf24;
+        --gold-bg: #fef3c7;
+        --radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --sidebar-width: 260px;
+        --sidebar-collapsed: 70px;
+    }
+    
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+    
+    body { 
+        background:var(--bg-body); 
+        color:var(--text-main); 
+        display:flex; 
+        min-height:100vh; 
+        overflow-x:hidden; 
+    }
+    
+    /* Sidebar */
+    aside {
+        width: var(--sidebar-width); 
+        background: #fff; 
+        border-right: 1px solid var(--border);
+        display:flex; 
+        flex-direction:column; 
+        padding: 20px; 
+        position:fixed; 
+        height:100vh; 
+        z-index:1000; 
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    aside.collapsed { width: var(--sidebar-collapsed); }
+    
+    aside.collapsed .brand span, 
+    aside.collapsed .nav-link span { 
+        display: none; opacity: 0; width: 0; overflow: hidden; 
+    }
+    
+    aside.collapsed .brand { justify-content: center; }
+    aside.collapsed .nav-link { justify-content: center; padding: 12px 0; }
+    
+    .brand { 
+        font-size:24px; 
+        font-weight:700; 
+        color:var(--primary); 
+        display:flex; 
+        align-items:center; 
+        gap:10px; 
+        margin-bottom:40px; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        transition: all 0.3s; 
+    }
+    
+    .nav-link {
+        padding:12px 15px; 
+        margin-bottom:8px; 
+        border-radius:var(--radius); 
+        color:var(--text-muted); 
+        text-decoration:none; 
+        display:flex; 
+        align-items:center; 
+        gap:10px; 
+        transition:0.2s; 
+        font-weight:500; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        cursor: pointer;
+    }
+    
+    .nav-link:hover, .nav-link.active { 
+        background:var(--bg-body); 
+        color:var(--primary); 
+    }
+    
+    .nav-link.logout { margin-top:auto; color:var(--danger); }
+    
+    .collapse-btn {
+        position: absolute; bottom: 20px; right: 20px; z-index: 50; 
+        background: var(--bg-body); border: 1px solid var(--border);
+        border-radius: 50%; width: 32px; height: 32px; 
+        display: flex; align-items: center; justify-content: center; 
+        cursor: pointer; transition: transform 0.3s; 
+        color: var(--text-muted); font-size: 16px;
+    }
+    
+    .collapse-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+    
+    aside.collapsed .collapse-btn { right: 50%; transform: translateX(50%) rotate(180deg); }
+
+    .mobile-toggle { 
+        display: none; position: fixed; top: 20px; left: 20px; z-index: 2000; 
+        background: var(--bg-surface); padding: 8px 12px; border-radius: 8px; 
+        box-shadow: var(--shadow); cursor: pointer; border: 1px solid var(--border); 
+    }
+
+    /* Main Content */
+    main { 
+        flex:1; 
+        margin-left: var(--sidebar-width); 
+        padding:30px; 
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s; 
+        width: calc(100% - var(--sidebar-width)); 
+    }
+    
+    aside.collapsed + main { margin-left: var(--sidebar-collapsed); width: calc(100% - var(--sidebar-collapsed)); }
+    
+    .header { 
+        display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; 
+        flex-wrap: wrap; gap: 10px; 
+    }
+    
+    .header h2 { font-size:28px; font-weight:600; }
+    
+    .user-badge { 
+        background:#fff; padding:8px 16px; border-radius:30px; 
+        box-shadow:var(--shadow); font-size:0.9rem; font-weight:600; 
+    }
+
+    /* Stats Grid */
+    .stats-grid { 
+        display:grid; 
+        grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); 
+        gap:20px; margin-bottom:30px; 
+    }
+    
+    .stat-card { 
+        background:#fff; padding:20px; border-radius:var(--radius); 
+        box-shadow:var(--shadow); border:1px solid var(--border); 
+        position: relative; overflow: hidden; display: flex; flex-direction: column; 
+    }
+    
+    .stat-card h3 { font-size:14px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-bottom:5px; }
+    .stat-card .value { font-size:28px; font-weight:700; color:var(--text-main); }
+    
+    .stat-card.revenue .value { color:var(--primary); }
+    .stat-card.stock .value { color:var(--warning); }
+    .stat-card.users .value { color:var(--primary-light); }
+    
+    /* Gold Card for Top User */
+    .stat-card.vip { border-color: var(--gold); background: linear-gradient(to bottom right, #fff, #fffbeb); }
+    .stat-card.vip .value { color: #b45309; }
+    .stat-card.vip::after { content: '👑'; position: absolute; right: 10px; top: 10px; font-size: 24px; opacity: 0.2; }
+    .stat-card.vip .sub-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; }
+
+    /* Button Styles */
+    .btn-outline {
+        width: 100%; padding: 8px; margin-top: auto;
+        background: transparent; color: var(--primary);
+        border:1px solid var(--primary); border-radius: 6px;
+        font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+
+    /* Content Split */
+    .content-split { display:grid; grid-template-columns: 350px 1fr; gap:30px; margin-bottom:30px; }
+    .charts-row { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; margin-bottom:30px; }
+    .chart-box { background:#fff; padding:20px; border-radius:var(--radius); box-shadow:var(--shadow); height:300px; position: relative; }
+
+    /* Panels */
+    .panel { background:#fff; padding:25px; border-radius:var(--radius); box-shadow:var(--shadow); height: 100%; }
+    .panel-header { margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+    .panel-header h3 { font-size:18px; font-weight:600; }
+
+    /* Search Input */
+    .search-input {
+        padding: 8px 12px;
+        border:1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        width: 200px;
+        outline: none;
+        transition: 0.2s;
+    }
+    .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(15,118,110,0.1);
+    }
+
+    /* Forms */
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; }
+    .form-group input, .form-group select { 
+        width:100%; padding:10px 15px; border:1px solid var(--border); 
+        border-radius:8px; outline:none; transition:0.2s; font-size:14px; background:#f8fafc; 
+    }
+    .form-group input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 2px rgba(15,118,110,0.1); }
+    
+    .btn-primary { 
+        width:100%; padding:12px; background:var(--primary); color:#fff; 
+        border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:0.2s; 
+    }
+    .btn-primary:hover { background:var(--primary-dark); }
+
+    /* Table */
+    .table-container { overflow-x:auto; max-height: 400px; overflow-y: auto; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { 
+        text-align:left; padding:15px; color:var(--text-muted); font-weight:600; 
+        border-bottom:2px solid var(--bg-body); white-space: nowrap; 
+        position: sticky; top: 0; background: #fff; z-index: 10; 
+    }
+    td { padding:15px; border-bottom:1px solid var(--bg-body); vertical-align:middle; }
+    tr:hover { background:#f8fafc; }
+    
+    .med-img { width:40px; height:40px; border-radius:6px; object-fit:cover; background:#eee; }
+    
+    .badge { 
+        padding:4px 8px; border-radius:12px; font-size:11px; font-weight:600; 
+        text-transform:uppercase; display: inline-block;
+    }
+    .badge.ok { background:#d1fae5; color:#065f46; }
+    .badge.low { background:#ffedd5; color:#9a3412; }
+    .badge.out { background:#fee2e2; color:#991b1b; }
+    
+    .badge-rank { 
+        display: inline-block; width: 24px; height: 24px; line-height: 24px; 
+        text-align: center; border-radius: 50%; font-weight: bold; font-size: 12px; 
+        background: #eee; color: #666; 
+    }
+    .badge-rank.top1 { background: var(--gold-bg); color: #b45309; }
+
+    .actions { display:flex; gap:8px; }
+    .btn-sm { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500; }
+    .btn-edit { background:#eff6ff; color:#2563eb; }
+    .btn-delete { background:#fef2f2; color:#dc2626; }
+
+    /* Deals Section */
+    .deals-management { margin-top:30px; }
+    .deals-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; margin-top:15px; }
+    .deal-card { background:#ffedd5; border:1px solid #ffedd5; padding:15px; border-radius:var(--radius); position:relative; }
+    .deal-card .deal-header { font-weight:700; color:#9a3412; margin-bottom:5px; }
+    .deal-card .deal-body { font-size:0.9rem; color:#c2410c; margin-bottom:10px; }
+    .deal-cat-tag { font-size:0.75rem; color:#ea580c; font-weight:600; text-transform:uppercase; margin-bottom:5px; display:block;}
+    .deal-actions { text-align:right; }
+
+    /* BRANDS MANAGEMENT SECTION */
+    .brands-management { margin-bottom:30px; }
+    .brands-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-top:15px; }
+    .brand-card-admin { background:#fff; border:1px solid var(--border); padding:15px; border-radius:var(--radius); position:relative; overflow: hidden; text-align: center; }
+    .brand-logo-admin { width:60px; height:60px; object-fit:contain; margin-bottom:10px; border-radius:50%; }
+    .brand-name-admin { font-weight:600; color:var(--text-main); margin-bottom:10px; }
+    .brand-actions { position:absolute; top:10px; right:10px; display:flex; gap:5px; }
+    .btn-xs { padding:4px 8px; font-size:10px; }
+
+    /* Banners Management Section */
+    .banners-management { margin-bottom:30px; }
+    .banners-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px; margin-top:15px; }
+    .banner-card { background:#fff; border:1px solid var(--border); padding:15px; border-radius:var(--radius); position:relative; overflow: hidden; }
+    .banner-preview { width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom:10px; }
+    .banner-title { font-weight:700; font-size:1rem; color:var(--text-main); margin-bottom:5px; }
+    .banner-actions { position:absolute; top:10px; right:10px; display:flex; gap:5px; }
+
+    /* Modal */
+    .modal-overlay { 
+        display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+        background:rgba(0,0,0,0.5); backdrop-filter:blur(2px); 
+        justify-content:center; align-items:center; z-index:3000; 
+    }
+    .modal-content { 
+        background:#fff; padding:30px; border-radius:16px; width:400px; 
+        box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); 
+        animation: slideIn 0.3s ease; 
+    }
+    
+    /* VIP Modal Specifics */
+    #vipModal .modal-content { width: 600px; max-width: 95%; max-height: 80vh; display: flex; flex-direction: column; }
+
+    @keyframes slideIn { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+    /* Responsive */
+    @media(max-width: 1100px) { 
+        .content-split { grid-template-columns: 1fr; } 
+        .charts-row { grid-template-columns: 1fr 1fr; } 
+        .search-input { width: 150px; } 
+    }
+    
+    @media(max-width: 768px) {
+        aside { transform: translateX(-100%); width: var(--sidebar-width); }
+        aside.mobile-open { transform: translateX(0); }
+        aside.collapsed { width: var(--sidebar-width); }
+        main { margin-left: 0 !important; width: 100% !important; }
+        .charts-row { grid-template-columns: 1fr; }
+        .mobile-toggle { display: flex; align-items: center; gap: 5px; font-weight: 600; }
+        .collapse-btn { display: none; }
+        #vipModal .modal-content { width: 95%; }
+        .search-input { width: 100%; margin-top: 10px; }
+        .panel-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    }
+</style>
+</head>
+<body>
+<div class="mobile-toggle" onclick="toggleMobileSidebar()">☰ Menu</div>
+
+<aside id="sidebar">
+    <div class="brand">💊 <span>PharmaCare</span></div>
+    <nav>
+        <a class="nav-link active" onclick="setActive(this)">📊 <span>Dashboard</span></a>
+        <a href="#inventory" class="nav-link">💊 <span>Inventory</span></a>
+        <a href="#brands" class="nav-link">🏷️ <span>Manage Brands</span></a>
+        <a href="#banners" class="nav-link">🖼️ <span>Banners</span></a>
+        <a href="#deals" class="nav-link">🔥 <span>Manage Deals</span></a>
+        <a href="/logout" class="nav-link logout">🚪 <span>Logout</span></a>
+    </nav>
+    <button class="collapse-btn" id="collapseBtn" onclick="toggleSidebarCollapse()">◀</button>
+</aside>
+
+<main>
+    <div class="header">
+        <h2>Admin Dashboard</h2>
+        <div class="user-badge">👤 {{ admin.name }}</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Products</h3>
+            <div class="value">{{ total_medicines }}</div>
+        </div>
+        <div class="stat-card stock">
+            <h3>Low Stock</h3>
+            <div class="value">{{ low_stock + out_of_stock }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <div class="value">{{ total_users }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total Sales</h3>
+            <div class="value">{{ total_sales }}</div>
+        </div>
+        <div class="stat-card revenue">
+            <h3>Total Revenue</h3>
+            <div class="value">${{ "%.2f"|format(total_revenue) }}</div>
+        </div>
+        
+        <!-- Top Customer Card -->
+        <div class="stat-card vip">
+            <h3>Top Customer</h3>
+            <div class="value" id="topCustomerName">Loading...</div>
+            <div class="sub-text" id="topCustomerSpent">$0.00 Spent</div>
+            <button class="btn-outline" onclick="openVipModal()">View Leaderboard</button>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+        <div class="chart-box">
+            <h3>Sales (7 Days)</h3>
+            <canvas id="salesChart"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3>Top Medicines</h3>
+            <canvas id="topMedicinesChart"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3>Stock Dist.</h3>
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+
+    <!-- BRANDS MANAGEMENT -->
+    <div class="brands-management" id="brands">
+        <div class="panel">
+            <div class="panel-header"><h3>Manage Brands</h3></div>
+            <div class="form-group" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+                <div>
+                    <label>Brand Name</label>
+                    <input type="text" id="brandName" placeholder="e.g. Bayer">
+                </div>
+                <div>
+                    <label>Image URL</label>
+                    <input type="text" id="brandImage" placeholder="https://...">
+                </div>
+                <div style="grid-column: 1/-1;">
+                    <button class="btn-primary" onclick="addBrand()">Add Brand</button>
+                </div>
+            </div>
+            <div class="brands-grid" id="brandsGrid">
+                {% for brand in brands %}
+                <div class="brand-card-admin">
+                    <div class="brand-actions">
+                        <button class="btn-sm btn-delete btn-xs" onclick="deleteBrand('{{ brand._id }}')">Delete</button>
+                    </div>
+                    <img src="{{ brand.image }}" alt="{{ brand.name }}" class="brand-logo-admin">
+                    <div class="brand-name-admin">{{ brand.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNERS MANAGEMENT -->
+    <div class="banners-management" id="banners">
+        <div class="panel">
+            <div class="panel-header"><h3>Manage Carousel Banners</h3></div>
+            <div class="form-group" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
+                <div><label>Image URL</label><input type="text" id="bannerImage" placeholder="https://..."></div>
+                <div><label>Title</label><input type="text" id="bannerTitle" placeholder="e.g. Summer Sale"></div>
+                <div><label>Link</label><input type="text" id="bannerLink" placeholder="/shop"></div>
+                <div style="grid-column: 1/-1;"><label>Description</label><input type="text" id="bannerDesc" placeholder="Short text for overlay"></div>
+                <div style="grid-column: 1/-1;"><button class="btn-primary" onclick="addBanner()">Add Banner</button></div>
+            </div>
+            <div class="banners-grid" id="bannersGrid">
+                {% for banner in banners %}
+                <div class="banner-card" data-id="{{ banner._id }}">
+                    <div class="banner-actions">
+                        <button class="btn-sm btn-delete btn-xs" onclick="deleteBanner('{{ banner._id }}')">Delete</button>
+                    </div>
+                    <img src="{{ banner.image }}" class="banner-preview">
+                    <div class="banner-title">{{ banner.title }}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">{{ banner.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Split -->
+    <div class="content-split" id="inventory">
+        <div class="panel">
+            <div class="panel-header"><h3>Add Medicine</h3></div>
+            <div class="form-group"><label>Name</label><input type="text" id="medName" placeholder="e.g. Paracetamol"></div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="medCategory">
+                    <option value="Pain Relief">Pain Relief</option>
+                    <option value="Antibiotics">Antibiotics</option>
+                    <option value="Vitamins">Vitamins</option>
+                    <option value="Skin Care">Skin Care</option>
+                    <option value="Supplements">Supplements</option>
+                    <option value="First Aid">First Aid</option>
+                    <option value="Baby Care">Baby Care</option>
+                    <option value="Personal Care">Personal Care</option>
+                    <option value="Devices">Devices</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Price ($)</label><input type="number" id="medPrice" step="0.01"></div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="medQuantity"></div>
+            <div class="form-group"><label>Image URL</label><input type="text" id="medImage" placeholder="Optional"></div>
+            <button class="btn-primary" onclick="addMedicine()">Add Product</button>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h3>Medicines Inventory</h3>
+                <input type="text" id="medSearch" class="search-input" placeholder="Search name or category...">
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <tbody id="medicineTable">
+                        {% for med in medicines %}
+                        <tr data-id="{{ med._id }}" data-name="{{ med.name|e }}" data-price="{{ med.price }}" data-quantity="{{ med.quantity }}" data-category="{{ med.category|e }}" data-image="{{ med.image|default('/static/images/default.png')|e }}">
+                            <td><img src="{{ med.image|default('/static/images/default.png') }}" class="med-img"></td>
+                            <td>{{ med.name }}</td>
+                            <td>{{ med.category }}</td>
+                            <td>${{ med.price }}</td>
+                            <td>
+                                {% if med.quantity == 0 %}
+                                    <span class="badge out">Out</span>
+                                {% elif med.quantity < 10 %}
+                                    <span class="badge low">Low ({{ med.quantity }})</span>
+                                {% else %}
+                                    <span class="badge ok">{{ med.quantity }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn-sm btn-edit" onclick="openEditModal(this)">Edit</button>
+                                    <button class="btn-sm btn-delete" onclick="deleteMedicine('{{ med._id }}')">Del</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Deals Section -->
+    <div class="deals-management" id="deals">
+        <div class="panel">
+            <div class="panel-header"><h3>Manage Active Deals</h3></div>
+            <div class="form-group" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; align-items:flex-end;">
+                <div><label>Deal Title</label><input type="text" id="dealTitle" placeholder="e.g. Weekend Sale"></div>
+                <div>
+                    <label>Category</label>
+                    <select id="dealCategory">
+                        <option value="All">All Categories</option>
+                        <option value="Pain Relief">Pain Relief</option>
+                        <option value="Antibiotics">Antibiotics</option>
+                        <option value="Vitamins">Vitamins</option>
+                        <option value="Skin Care">Skin Care</option>
+                        <option value="Supplements">Supplements</option>
+                        <option value="First Aid">First Aid</option>
+                        <option value="Baby Care">Baby Care</option>
+                        <option value="Personal Care">Personal Care</option>
+                        <option value="Devices">Devices</option>
+                    </select>
+                </div>
+                <div><label>Discount</label><input type="text" id="dealDiscount" placeholder="50%"></div>
+                <div><label>Code</label><input type="text" id="dealCode" placeholder="SAVE50"></div>
+                <div style="grid-column: 1/-1;"><label>Description</label><input type="text" id="dealDesc" placeholder="Limited time offer"></div>
+                <div style="grid-column: 1/-1;"><button class="btn-primary" onclick="addDeal()">Add New Deal</button></div>
+            </div>
+            <div class="deals-grid" id="dealsGrid">
+                {% for deal in deals %}
+                <div class="deal-card" data-id="{{ deal._id }}">
+                    <span class="deal-cat-tag">For: {{ deal.category }}</span>
+                    <div class="deal-header">{{ deal.title }}</div>
+                    <div class="deal-body">{{ deal.description }}</div>
+                    <div style="background:#fff; display:inline-block; padding:2px 6px; border-radius:4px; font-weight:600; color:#9a3412; margin-bottom:5px;">{{ deal.discount }}</div>
+                    <div style="font-size:0.8rem; color:#9a3412;">Code: {{ deal.code }}</div>
+                    <div class="deal-actions"><button class="btn-sm btn-delete" onclick="deleteDeal('{{ deal._id }}')">Delete</button></div>
+                </div>
+                {% endfor %}
+                {% if deals|length == 0 %}
+                <div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:20px;">No active deals.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+        <div class="panel-header"><h3>Edit Product</h3><span style="cursor:pointer; font-size:20px;" onclick="closeEditModal()">×</span></div>
+        <input type="hidden" id="editMedId">
+        <div class="form-group"><label>Name</label><input type="text" id="editMedName"></div>
+        <div class="form-group">
+            <label>Category</label>
+            <select id="editMedCategory">
+                <option value="Pain Relief">Pain Relief</option>
+                <option value="Antibiotics">Antibiotics</option>
+                <option value="Vitamins">Vitamins</option>
+                <option value="Skin Care">Skin Care</option>
+                <option value="Supplements">Supplements</option>
+                <option value="First Aid">First Aid</option>
+                <option value="Baby Care">Baby Care</option>
+                <option value="Personal Care">Personal Care</option>
+                <option value="Devices">Devices</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Price</label><input type="number" id="editMedPrice"></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="editMedQuantity"></div>
+        <div class="form-group"><label>Image URL</label><input type="text" id="editMedImage"></div>
+        <button class="btn-primary" onclick="saveEditMedicine()">Save Changes</button>
+    </div>
+</div>
+
+<!-- VIP Modal (Top Users) -->
+<div class="modal-overlay" id="vipModal">
+    <div class="modal-content">
+        <div class="panel-header">
+            <h3 style="color: var(--primary);">Top VIP Customers</h3>
+            <span style="cursor:pointer; font-size:20px;" onclick="closeVipModal()">×</span>
+        </div>
+        <div class="table-container">
+            <table id="topUsersTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Customer Name</th>
+                        <th>Email</th>
+                        <th>Total Spent</th>
+                        <th>Orders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sidebar Logic
+function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('sidebar');
+    const btn = document.getElementById('collapseBtn');
+    sidebar.classList.toggle('collapsed');
+    if(sidebar.classList.contains('collapsed')){ 
+        btn.textContent = '▶'; 
+        btn.style.transform = 'translateX(50%) rotate(0deg)'; 
+    } else { 
+        btn.textContent = '◀'; 
+        btn.style.transform = 'translateX(0) rotate(0deg)'; 
+    }
+}
+function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
+function setActive(element) { 
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); 
+    element.classList.add('active'); 
+    if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open'); 
+}
+
+// Brand Logic
+function addBrand(){
+    const name = document.getElementById('brandName').value;
+    const image = document.getElementById('brandImage').value;
+    if(!name || !image){ alert("Brand Name and Image are required"); return; }
+    fetch("/admin/add_brand", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name, image})
+    }).then(res=>res.json()).then(data=>{
+        alert(data.message);
+        location.reload(); 
+    });
+}
+function deleteBrand(id){
+    if(confirm("Delete this brand?")){
+        fetch("/admin/delete_brand", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({id})
+        }).then(res=>res.json()).then(data=>{
+            alert(data.message);
+            location.reload();
+        });
+    }
+}
+
+// Banner Logic
+function addBanner(){
+    const image = document.getElementById('bannerImage').value;
+    const title = document.getElementById('bannerTitle').value;
+    const link = document.getElementById('bannerLink').value;
+    const desc = document.getElementById('bannerDesc').value;
+    if(!image || !title){ alert("Image URL and Title are required"); return; }
+    fetch("/admin/add_banner", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({image, title, description: desc, link})
+    }).then(res=>res.json()).then(data=>{
+        alert(data.message);
+        location.reload(); 
+    });
+}
+function deleteBanner(id){
+    if(confirm("Delete this banner?")){
+        fetch("/admin/delete_banner", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({id})
+        }).then(res=>res.json()).then(data=>{
+            alert(data.message);
+            location.reload();
+        });
+    }
+}
+
+// Medicine CRUD
+function addMedicine(){
+    const name = document.getElementById('medName').value;
+    const price = document.getElementById('medPrice').value;
+    const quantity = document.getElementById('medQuantity').value;
+    const category = document.getElementById('medCategory').value;
+    const image = document.getElementById('medImage').value;
+    if(!name || !price || !quantity) { alert("Please fill required fields"); return; }
+    fetch("/admin/add_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({name, price, quantity, category, image}) }).then(res => res.json()).then(data=>{ alert(data.message); if(data.message.includes("success")) location.reload(); });
+}
+function deleteMedicine(id){
+    if(confirm("Delete this medicine?")){ fetch("/admin/delete_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id}) }).then(res => res.json()).then(data=>{ alert(data.message); location.reload(); }); }
+}
+function openEditModal(btn){
+    const tr = btn.closest('tr');
+    document.getElementById('editMedId').value = tr.dataset.id;
+    document.getElementById('editMedName').value = tr.dataset.name;
+    document.getElementById('editMedPrice').value = tr.dataset.price;
+    document.getElementById('editMedQuantity').value = tr.dataset.quantity;
+    document.getElementById('editMedCategory').value = tr.dataset.category;
+    document.getElementById('editMedImage').value = tr.dataset.image;
+    document.getElementById('editModal').style.display = 'flex';
+}
+function closeEditModal(){ document.getElementById('editModal').style.display = 'none'; }
+function saveEditMedicine(){
+    const id = document.getElementById('editMedId').value;
+    const name = document.getElementById('editMedName').value;
+    const price = document.getElementById('editMedPrice').value;
+    const quantity = document.getElementById('editMedQuantity').value;
+    const category = document.getElementById('editMedCategory').value;
+    const image = document.getElementById('editMedImage').value;
+    fetch("/admin/edit_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id, name, price, quantity, category, image}) }).then(res=>res.json()).then(data=>{ alert(data.message); location.reload(); });
+}
+
+// Deals CRUD
+function addDeal(){
+    const title = document.getElementById('dealTitle').value;
+    const category = document.getElementById('dealCategory').value; 
+    const discount = document.getElementById('dealDiscount').value;
+    const code = document.getElementById('dealCode').value;
+    const description = document.getElementById('dealDesc').value;
+    if(!title || !discount){ alert("Title and Discount are required"); return; }
+    fetch("/admin/add_deal", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({title, category, discount, code, description})
+    }).then(res=>res.json()).then(data=>{
+        alert(data.message);
+        location.reload();
+    });
+}
+function deleteDeal(id){
+    if(confirm("Delete this deal?")){
+        fetch("/admin/delete_deal", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({id})
+        }).then(res=>res.json()).then(data=>{
+            alert(data.message);
+            location.reload();
+        });
+    }
+}
+
+// Inventory Search
+document.getElementById('medSearch').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#medicineTable tr');
+    rows.forEach(row => {
+        const name = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+        const category = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
+        if(name.includes(term) || category.includes(term)) { row.style.display = ''; } else { row.style.display = 'none'; }
+    });
+});
+
+// VIP Modal Logic
+function openVipModal() { document.getElementById('vipModal').style.display = 'flex'; }
+function closeVipModal() { document.getElementById('vipModal').style.display = 'none'; }
+
+// Charts & Top Users Logic
+fetch("/admin/dashboard_data").then(res => res.json()).then(data => {
+    // Chart Defaults
+    Chart.defaults.font.family = "'Inter', sans-serif"; 
+    Chart.defaults.color = '#64748b';
+    
+    // Sales Chart
+    new Chart(document.getElementById('salesChart'), { 
+        type:'line', 
+        data:{ 
+            labels: data.sales_over_time.dates, 
+            datasets:[{ 
+                label:'Revenue', 
+                data:data.sales_over_time.amounts, 
+                borderColor:'#0f766e', 
+                backgroundColor:'rgba(15,118,110,0.1)', 
+                borderWidth:2, 
+                tension:0.4, 
+                fill:true 
+            }] 
+        }, 
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            plugins: { legend: {display:false} }, 
+            scales: { y:{ beginAtZero:true, grid:{borderDash:[5,5]} }, x:{ grid:{display:false} } } 
+        } 
+    });
+    
+    // Top Medicines Chart
+    new Chart(document.getElementById('topMedicinesChart'), { 
+        type:'bar', 
+        data:{ 
+            labels: data.top_medicines.names, 
+            datasets:[{ 
+                label:'Sold', 
+                data:data.top_medicines.sold, 
+                backgroundColor:'#14b8a6', 
+                borderRadius:4 
+            }] 
+        }, 
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            plugins: { legend: {display:false} }, 
+            scales: { y:{ beginAtZero:true, grid:{display:false} }, x:{ grid:{display:false} } } 
+        } 
+    });
+    
+    // Stock Distribution Chart
+    new Chart(document.getElementById('stockChart'), { 
+        type:'doughnut', 
+        data:{ 
+            labels:['In Stock','Low Stock','Out'], 
+            datasets:[{ 
+                data:[data.stock_status.in_stock, data.stock_status.low_stock, data.stock_status.out_of_stock], 
+                backgroundColor:['#10b981', '#f59e0b', '#ef4444'], 
+                borderWidth:0 
+            }] 
+        }, 
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            plugins: { legend: { position:'bottom', labels:{ usePointStyle:true, boxWidth:8 } } }, 
+            cutout:'70%' 
+        } 
+    });
+
+    // Top Users Leaderboard
+    const topUsers = data.top_users || [];
+    const topUserTableBody = document.querySelector("#topUsersTable tbody");
+    const topCustomerNameEl = document.getElementById("topCustomerName");
+    const topCustomerSpentEl = document.getElementById("topCustomerSpent");
+
+    if (topUsers.length > 0) {
+        const bestCustomer = topUsers[0];
+        topCustomerNameEl.textContent = bestCustomer.name;
+        topCustomerSpentEl.textContent = `$${bestCustomer.spent} Spent`;
+        
+        topUsers.forEach((user, index) => {
+            const tr = document.createElement("tr");
+            const rank = index + 1;
+            tr.innerHTML = `
+                <td><span class="badge-rank ${rank === 1 ? 'top1' : ''}">${rank}</span></td>
+                <td style="font-weight: 600; color: var(--text-main);">${user.name}</td>
+                <td style="color: var(--text-muted);">${user.email}</td>
+                <td style="font-weight: 700; color: var(--primary);">$${user.spent}</td>
+                <td>${user.orders}</td>
+            `;
+            topUserTableBody.appendChild(tr);
+        });
+    } else {
+        topCustomerNameEl.textContent = "No data";
+        topCustomerSpentEl.textContent = "-";
+        topUserTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No orders yet.</td></tr>`;
+    }
+});
+</script>
+</body>
+</html>

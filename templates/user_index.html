@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PharmaCare - Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>    :root {
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --primary-dark: #0d5e56;
+        --secondary: #ccfbf1;
+        --accent: #f59e0b;
+        --danger: #ef4444;
+        --wishlist: #e11d48;
+        --bg-body: #f0fdfa;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius: 12px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background:var(--bg-body); color:var(--text-main); overflow-x:hidden; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Navbar */
+    nav { 
+        display:flex; justify-content:space-between; align-items:center; 
+        padding:1rem 2rem; 
+        background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+        color:var(--primary); position:sticky; top:0; z-index:100; 
+        box-shadow:var(--shadow-sm); border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .brand { display:flex; align-items:center; gap:10px; cursor:pointer; flex-shrink: 0; }
+    .brand h1 { font-size:24px; font-weight:700; background: linear-gradient(90deg, var(--primary), var(--primary-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .nav-center { flex:1; margin:0 40px; }
+    nav input { 
+        width:100%; padding:12px 20px; border-radius:50px; 
+        border:1px solid #e2e8f0; background:#f8fafc; outline:none; 
+        transition:0.3s; color:var(--text-main);
+    }
+    nav input:focus { background:#fff; border-color:var(--primary); box-shadow:0 0 0 3px rgba(20, 184, 166, 0.2); }
+    
+    .nav-actions { display:flex; align-items:center; gap:20px; flex-shrink: 0; }
+    .nav-btn { cursor:pointer; font-size:20px; color:var(--text-muted); transition:0.3s; position:relative; background:none; border:none; padding: 5px; }
+    .nav-btn:hover { color:var(--primary); transform:translateY(-2px); }
+    
+    .cart-badge, .wishlist-badge { 
+        position:absolute; top:-2px; right:-4px; 
+        background:var(--danger); color:#fff; font-size:9px; font-weight:700; 
+        height:16px; min-width:16px; display:flex; align-items:center; justify-content:center; 
+        border-radius:50%; padding:0 3px; border:2px solid #fff; 
+    }
+    .wishlist-badge { background: var(--wishlist); }
+    
+    .hamburger { display:block; font-size:24px; margin-left:10px; }
+
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        padding: 3rem 2rem; margin: 20px 20px 0 20px; border-radius: var(--radius);
+        color: white; position: relative; overflow: hidden; box-shadow: var(--shadow-md);
+        z-index: 1;
+        display: flex; flex-direction: column; gap: 1rem;
+    }
+    .hero::before {
+        content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10%);
+        background-size: 20px 20px; opacity: 0.5; pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 600px; }
+    .hero h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .hero p { opacity: 0.9; font-weight: 300; }
+    
+    .hero-btn {
+        display: inline-block; background: white; color: var(--primary);
+        padding: 12px 30px; border-radius: 50px; font-weight: 700; text-decoration: none;
+        margin-top: 10px; width: fit-content; transition: 0.3s;
+    }
+    .hero-btn:hover { transform: scale(1.05); background: var(--secondary); }
+
+    /* Container */
+    .container { max-width:1300px; margin:0 auto; padding:20px; }
+
+    /* Filter Bar */
+    .filters-container {
+        position: sticky; top: 85px; z-index: 90; margin-bottom: 20px;
+        background: rgba(255,255,255,0.8); backdrop-filter: blur(8px);
+        padding: 15px; border-radius: var(--radius); border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+    }
+    .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .filter-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 5px; white-space: nowrap; }
+    
+    .filter-btn { 
+        padding: 8px 16px; border:1px solid #e2e8f0; border-radius:20px; 
+        background:#fff; cursor:pointer; font-size:0.85rem; font-weight:500; 
+        color:var(--text-muted); transition:all 0.2s ease; white-space: nowrap;
+    }
+    .filter-btn:hover { border-color:var(--primary-light); color:var(--primary); }
+    .filter-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 2px 5px rgba(15, 118, 110, 0.3); }
+
+    /* Grid */
+    .medicine-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:30px; margin-top:10px; }
+
+    /* Medicine Card */
+    .medicine-card { 
+        background:var(--bg-card); border-radius:16px; padding:20px; 
+        box-shadow:var(--shadow-sm); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        display:flex; flex-direction:column; align-items:center; text-align:center;
+        position:relative; border:1px solid transparent; overflow: hidden;
+    }
+    .medicine-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-lg); border-color:var(--secondary); }
+    
+    .card-wishlist-btn {
+        position: absolute; top: 15px; right: 15px;
+        width: 35px; height: 35px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+        z-index: 5;
+    }
+    .card-wishlist-btn svg { width: 20px; height: 20px; fill: none; stroke: var(--text-muted); stroke-width: 2; transition: 0.2s; }
+    .card-wishlist-btn:hover { border-color: var(--wishlist); }
+    .card-wishlist-btn:hover svg { stroke: var(--wishlist); }
+    .card-wishlist-btn.active svg { fill: var(--wishlist); stroke: var(--wishlist); transform: scale(1.1); }
+    
+    .card-cat-badge {
+        position:absolute; top:15px; left:15px;
+        background:var(--secondary); color:var(--primary-dark);
+        font-size:0.7rem; font-weight:700; padding:4px 10px;
+        border-radius:12px; text-transform:uppercase; letter-spacing:0.5px;
+        z-index: 4;
+    }
+    
+    .offer-ribbon {
+        position: absolute; top: 15px; right: -35px; 
+        background: #ef4444; color: white;
+        padding: 5px 40px; transform: rotate(45deg);
+        font-size: 0.8rem; font-weight: 700;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .img-wrapper {
+        width:140px; height:140px; margin: 20px 0;
+        display:flex; align-items:center; justify-content:center;
+        background: radial-gradient(circle, #f0fdfa 0%, #fff 70%);
+        border-radius:50%;
+    }
+    .medicine-card img { width:100px; height:100px; object-fit:contain; mix-blend-mode: multiply; }
+    
+    .medicine-card h3 { font-size:1.1rem; margin-bottom:5px; color:var(--text-main); font-weight:600; }
+    .medicine-card .price { font-size:1.25rem; color:var(--primary); font-weight:700; margin-bottom:15px; }
+    .stock-tag { font-size:0.8rem; color:var(--text-muted); margin-bottom:15px; }
+    .stock-tag.low { color:var(--accent); }
+    .stock-tag.out { color:var(--danger); }
+
+    .add-btn {
+        margin-top:auto; width:100%; padding:12px; border:none; border-radius:10px;
+        background:var(--primary); color:white; font-weight:600; cursor:pointer;
+        transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .add-btn:hover { background:var(--primary-dark); }
+    .add-btn:disabled { background:#cbd5e1; cursor:not-allowed; }
+
+    /* TOP SELLING SECTION */
+    .top-selling-section {
+        margin-top: 50px;
+        padding: 20px 0;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .section-title {
+        font-size: 1.5rem; font-weight: 700; color: var(--primary);
+        margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .top-selling-scroll {
+        display: flex; gap: 20px; overflow-x: auto;
+        padding-bottom: 20px; scroll-behavior: smooth;
+        -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .top-selling-scroll::-webkit-scrollbar { display: none; }
+    .top-selling-scroll .medicine-card { min-width: 260px; }
+
+    /* CAROUSEL BANNER SECTION */
+    .carousel-section {
+        margin: 40px 0;
+        position: relative;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        background: #fff;
+    }
+    .carousel-container {
+        display: flex; overflow-x: scroll; scroll-snap-type: x mandatory;
+        scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+    }
+    .carousel-container::-webkit-scrollbar { height: 6px; }
+    .carousel-container::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+    .carousel-container::-webkit-scrollbar-track { background: #f1f5f9; }
+
+    .carousel-slide {
+        flex: 0 0 100%; scroll-snap-align: start;
+        position: relative; width: 100%; height: 350px;
+        overflow: hidden;
+    }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-content {
+        position: absolute; bottom: 40px; left: 40px;
+        color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        max-width: 60%;
+    }
+    .carousel-content h3 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+    .carousel-content p { font-size: 1.2rem; margin-bottom: 20px; }
+    .carousel-btn {
+        padding: 12px 24px; background: white; color: var(--primary);
+        border: none; border-radius: 50px; font-weight: 700; cursor: pointer;
+        text-decoration: none; display: inline-block; transition: 0.3s;
+    }
+    .carousel-btn:hover { transform: scale(1.05); background: var(--secondary); }
+
+    /* --- BRANDS SECTION --- */
+    .brands-section {
+        margin-bottom: 30px;
+        padding: 20px 0;
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+    }
+    .brand-scroll {
+        display: flex; gap: 20px; overflow-x: auto;
+        padding: 20px; scroll-behavior: smooth;
+        -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .brand-scroll::-webkit-scrollbar { display: none; }
+    
+    .brand-item {
+        display: flex; flex-direction: column; align-items: center;
+        min-width: 120px; cursor: pointer; transition: 0.3s;
+    }
+    .brand-item:hover { transform: translateY(-5px); }
+    
+    .brand-logo {
+        width: 80px; height: 80px;
+        border-radius: 50%; 
+        object-fit: contain; 
+        border: 1px solid #e2e8f0;
+        padding: 10px;
+        background: #fff;
+        margin-bottom: 10px;
+        box-shadow: var(--shadow-sm);
+        transition: 0.3s;
+    }
+    .brand-item:hover .brand-logo {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-md);
+    }
+    .brand-name {
+        font-size: 0.9rem; font-weight: 600; color: var(--text-main);
+        text-align: center;
+    }
+
+    /* Deals Section (Bottom - Codes) */
+    .bottom-deals-section {
+        margin-top: 50px;
+        padding: 30px 20px;
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+    }
+    .section-header { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-header h3 { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+    .bottom-deals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .deal-card-large {
+        border: 2px dashed var(--accent); background: #ffedd5;
+        padding: 20px; border-radius: var(--radius);
+        display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        transition: 0.3s;
+    }
+    .deal-card-large:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .deal-tag-large { background: var(--accent); color: #fff; font-weight: 800; padding: 5px 15px; border-radius: 20px; font-size: 1.1rem; margin-bottom: 10px; }
+    .deal-title-large { font-weight: 700; color: #9a3412; font-size: 1.2rem; margin-bottom: 5px; }
+    .deal-code-large { font-size: 0.9rem; color: #c2410c; font-weight: 600; background: #fff; padding: 5px 10px; border-radius: 8px; margin-top: 10px; }
+
+    /* FOOTER */
+    footer {
+        background: var(--primary-dark);
+        color: white;
+        padding: 3rem 2rem 1rem 2rem;
+        margin-top: auto;
+    }
+    .footer-content {
+        max-width: 1300px; margin: 0 auto;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem; margin-bottom: 2rem;
+    }
+    .footer-section h4 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--primary-light); }
+    .footer-section ul { list-style: none; }
+    .footer-section ul li { margin-bottom: 0.5rem; }
+    .footer-section a { color: #cbd5e1; text-decoration: none; transition: 0.2s; }
+    .footer-section a:hover { color: white; padding-left: 5px; }
+    .footer-bottom {
+        text-align: center; border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 1rem; font-size: 0.9rem; color: var(--text-muted);
+    }
+
+    /* Side Navbar */
+    #sideNav { 
+        position: fixed; left: -300px; top: 0; width: 280px; height: 100%; 
+        background:#fff; color:var(--text-main); padding: 25px; 
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 300; 
+        box-shadow: 5px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+    }
+    #sideNav.open { left: 0; }
+    #sideNav h2 { margin-bottom:30px; color:var(--primary); font-size:1.5rem; }
+    .menu-link { 
+        display:block; margin:15px 0; padding:12px 15px; border-radius:12px; 
+        background:#f8fafc; color:var(--text-main); text-decoration:none; 
+        font-weight:500; transition:0.2s; border:1px solid transparent;
+    }
+    .menu-link:hover { background:var(--secondary); color:var(--primary-dark); }
+    .close-nav { position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer; color:var(--text-muted); }
+
+    /* MODALS CONTAINER */
+    #profileModal, #contactModal { 
+        display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+        background:rgba(15, 118, 110, 0.4); backdrop-filter:blur(5px);
+        z-index:400; justify-content:center; align-items:center; 
+    }
+    
+    /* PROFILE MODAL */
+    .modal { 
+        background:#fff; padding:35px; border-radius:20px; width:100%; max-width:450px; 
+        box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out;
+        position: relative;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .modal h2 { margin-bottom:25px; color:var(--primary); text-align:center; }
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block; font-size:0.9rem; font-weight:600; margin-bottom:5px; color:var(--text-muted); }
+    .form-group input, .form-group textarea, .form-group select { 
+        width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; 
+        background:#f8fafc; outline:none; transition:0.3s; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--primary); background:#fff; }
+    .modal-btn { width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:600; margin-top:10px; cursor:pointer; transition: 0.2s; }
+    .modal-btn:hover { background:var(--primary-dark); }
+    .close-modal { position:absolute; top:20px; right:20px; cursor:pointer; font-size:20px; color:var(--text-muted); }
+
+    /* ENHANCED CONTACT MODAL */
+    .contact-modal-enhanced {
+        max-width: 800px; width: 90%; padding: 0; overflow: hidden;
+        display: flex; flex-direction: row; border-radius: 20px; background: white;
+    }
+    .contact-left {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white; padding: 40px; width: 40%;
+        display: flex; flex-direction: column; justify-content: center; position: relative;
+    }
+    .contact-left h3 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 700; }
+    .contact-left p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 30px; line-height: 1.5; }
+    .contact-info-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .contact-info-item svg { width: 20px; height: 20px; fill: white; opacity: 0.8; }
+    .contact-right { padding: 40px; width: 60%; background: #fff; }
+    .contact-right h2 { color: var(--primary); margin-bottom: 5px; }
+    .contact-right .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; display: block; }
+
+    /* Cart Sidebar & Wishlist Sidebar */
+    .sidebar-drawer { 
+        position:fixed; right:-400px; top:0; width:380px; height:100%; 
+        background:#fff; padding:0; transition:right 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        z-index:200; box-shadow:-10px 0 30px rgba(0,0,0,0.1); display:flex; flex-direction:column;
+    }
+    .sidebar-drawer.open { right: 0; }
+    .drawer-header { padding:25px; background:var(--bg-body); border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
+    .drawer-header h2 { font-size:1.4rem; color:var(--primary); }
+    #wishlistSidebar .drawer-header h2 { color: var(--wishlist); }
+    .drawer-body { flex:1; overflow-y:auto; padding:20px; }
+    
+    .sidebar-item { 
+        display:flex; gap:15px; margin-bottom:15px; background:#fff; 
+        border:1px solid #f1f5f9; padding:10px; border-radius:12px; align-items:center;
+    }
+    .sidebar-item img { width:60px; height:60px; object-fit:contain; border-radius:8px; background:#f8fafc; }
+    .item-details { flex:1; }
+    .item-details h4 { font-size:0.95rem; margin-bottom:4px; }
+    .item-details p { color:var(--primary); font-weight:600; font-size:0.9rem; }
+    
+    .remove-btn { 
+        background:#fee2e2; color:var(--danger); border:none; width:30px; height:30px; 
+        border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;
+        transition:0.2s;
+    }
+    .remove-btn:hover { background:var(--danger); color:white; }
+
+    .add-cart-from-wishlist {
+        margin-top: 5px; font-size: 0.8rem; color: var(--primary); 
+        background: none; border: none; cursor: pointer; text-decoration: underline;
+        padding:0;
+    }
+
+    .drawer-footer { padding:25px; border-top:1px solid #e2e8f0; background:var(--bg-body); }
+    .checkout-btn { 
+        width:100%; padding:14px; background:linear-gradient(90deg, var(--primary), var(--primary-light)); 
+        color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; 
+        box-shadow:0 4px 6px -1px rgba(15, 118, 110, 0.3); transition:0.3s;
+    }
+    .checkout-btn:hover { box-shadow:0 6px 10px -1px rgba(15, 118, 110, 0.4); transform:translateY(-1px); }
+
+    /* Toast */
+    #toast { 
+        position:fixed; bottom:30px; right:30px; background:var(--text-main); color:#fff; 
+        padding:15px 25px; border-radius:8px; display:none; z-index:500; 
+        box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Responsive Styles */
+    @media(max-width: 900px) {
+        nav { flex-wrap: wrap; padding: 1rem; }
+        .nav-center { order: 3; width: 100%; margin: 10px 0 0 0; }
+        .nav-actions { gap: 15px; }
+        .hamburger { margin-left: 0; }
+        .hero { margin: 0; border-radius: 0; padding: 2rem 1rem; }
+        .hero h2 { font-size: 1.8rem; }
+        
+        .sidebar-drawer { width: 100%; right: -100%; }
+        
+        .contact-modal-enhanced { flex-direction: column; width: 95%; max-height: 90vh; overflow-y: auto; border-radius: 15px; }
+        .contact-left, .contact-right { width: 100%; padding: 25px; }
+        .contact-left { padding: 30px 25px; }
+        .contact-right { padding: 25px; }
+
+        .footer-content { grid-template-columns: repeat(2, 1fr); }
+        .bottom-deals-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Mobile Styles (Phones) */
+    @media(max-width: 600px) {
+        /* Navbar */
+        nav { padding: 0.8rem 1rem; align-items: center; }
+        .nav-actions { margin-left: auto; order: 1; } /* Icons top right */
+        .nav-center { order: 2; width: 100%; margin: 10px 0 0 0; display: none; } /* Hide search initially? Or keep small */
+        .nav-center.visible-mobile { display: block; } /* Toggle class via JS if desired, for now let's keep it stacked small */
+        .nav-center { display: block; } /* Keep visible but small */
+        nav input { padding: 10px 15px; font-size: 14px; }
+        
+        /* Hero */
+        .hero { padding: 2rem 1rem; text-align: center; }
+        .hero-content { align-items: center; display: flex; flex-direction: column; width: 100%; }
+        .hero h2 { font-size: 1.5rem; }
+        .hero-btn { width: 100%; text-align: center; }
+
+        /* Filters */
+        .filters-container {
+            position: relative; /* Non-sticky on mobile to save space */
+            top: 0;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 10px;
+            gap: 15px;
+            border-radius: 0; /* Full width flush */
+            margin-left: -20px; margin-right: -20px; /* Bleed to edges */
+            width: calc(100% + 40px);
+            border-left: none; border-right: none;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .filter-label { margin-bottom: 5px; display: block; }
+        .filter-group {
+            display: flex;
+            overflow-x: auto; /* Horizontal scroll */
+            flex-wrap: nowrap;
+            padding-bottom: 5px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            width: 100%;
+        }
+        .filter-group::-webkit-scrollbar { display: none; }
+        .filter-btn { font-size: 0.8rem; padding: 6px 12px; flex-shrink: 0; }
+
+        /* Grid */
+        .medicine-grid { 
+            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            gap: 15px; 
+        }
+        
+        /* Product Card */
+        .medicine-card { padding: 12px; }
+        .img-wrapper { width: 70px; height: 70px; margin: 10px 0; }
+        .medicine-card img { width: 50px; height: 50px; }
+        .medicine-card h3 { font-size: 0.9rem; line-height: 1.2; margin-bottom: 2px; }
+        .medicine-card .price { font-size: 1rem; margin-bottom: 8px; }
+        .stock-tag { font-size: 0.7rem; margin-bottom: 8px; }
+        .add-btn { padding: 8px; font-size: 0.8rem; }
+        .card-cat-badge, .offer-ribbon, .card-wishlist-btn { transform: scale(0.8); }
+        .card-cat-badge { top: 10px; left: 10px; }
+        .card-wishlist-btn { top: 10px; right: 10px; }
+        
+        /* Top Selling Scroll */
+        .top-selling-scroll { gap: 15px; padding: 10px 0 20px 20px; margin-left: -20px; width: 100vw; }
+        .top-selling-scroll .medicine-card { min-width: 160px; flex-shrink: 0; }
+
+        /* Carousel */
+        .carousel-slide { height: 250px; }
+        .carousel-content { bottom: 20px; left: 20px; right: 20px; max-width: none; }
+        .carousel-content h3 { font-size: 1.5rem; }
+        .carousel-content p { font-size: 0.9rem; display: none; /* Hide paragraph on small screens */ }
+        
+        /* Brands */
+        .brand-scroll { padding: 15px; }
+        .brand-item { min-width: 80px; }
+        .brand-logo { width: 50px; height: 50px; padding: 5px; }
+        .brand-name { font-size: 0.75rem; }
+
+        /* Modals */
+        .modal { width: 95%; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        
+        /* Footer */
+        .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
+        .footer-section { text-align: center; }
+    }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>    
+    <div class="brand" onclick="window.location.href='/home'">
+        <span style="font-size:28px;">💊</span>
+        <h1>PharmaCare</h1>
+    </div>
+    
+    <div class="nav-center">
+        <input type="text" placeholder="Search medicines..." id="searchInput">
+    </div>
+
+    <div class="nav-actions">
+        <button class="nav-btn hamburger" onclick="toggleSideNav()">☰</button>
+        
+        <button class="nav-btn" onclick="toggleWishlistSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="wishlist-badge" id="wishlistCount">{{ wishlist|length }}</span>
+        </button>
+        
+        <button class="nav-btn" onclick="toggleCart()">
+            🛒 <span class="cart-badge" id="cartCount">{{ cart|length }}</span>
+        </button>
+        <button class="nav-btn" onclick="openProfileModal()">👤</button>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero">
+    <div class="hero-content">
+        <h2>Welcome back, {{ user.name }}!</h2>
+        <p>Exclusive deals just for you.</p>
+        <a href="/medicines" class="hero-btn">Browse All Medicines ➔</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="filter-group">
+            <span class="filter-label">Category:</span>
+            <button class="filter-btn active" onclick="filterCategory('All', event)">All</button>
+            <button class="filter-btn" onclick="filterCategory('Pain Relief', event)">Pain Relief</button>
+            <button class="filter-btn" onclick="filterCategory('Antibiotics', event)">Antibiotics</button>
+            <button class="filter-btn" onclick="filterCategory('Vitamins', event)">Vitamins</button>
+            <button class="filter-btn" onclick="filterCategory('Skin Care', event)">Skin Care</button>
+            <!-- CATEGORIES -->
+            <button class="filter-btn" onclick="filterCategory('Supplements', event)">Supplements</button>
+            <button class="filter-btn" onclick="filterCategory('First Aid', event)">First Aid</button>
+            <button class="filter-btn" onclick="filterCategory('Baby Care', event)">Baby Care</button>
+            <button class="filter-btn" onclick="filterCategory('Personal Care', event)">Personal Care</button>
+            <button class="filter-btn" onclick="filterCategory('Devices', event)">Devices</button>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Price:</span>
+            <button class="filter-btn active" onclick="filterPrice('Any', event)">Any</button>
+            <button class="filter-btn" onclick="filterPrice('under10', event)">< $10</button>
+            <button class="filter-btn" onclick="filterPrice('10to50', event)">$10 - $50</button>
+            <button class="filter-btn" onclick="filterPrice('above50', event)">> $50</button>
+        </div>
+    </div>
+
+    <!-- SPECIAL OFFERS SECTION (Main Grid) -->
+    {% if medicines|length > 0 %}
+    <section class="special-offers-section">
+        <div class="section-title">🏷️ Special Offers</div>
+        <div class="medicine-grid" id="dealsGrid">
+            {% for med in medicines %}
+            <div class="medicine-card" data-category="{{ med.category }}" data-price="{{ med.price }}">
+                
+                <!-- Offer Ribbon -->
+                <div class="offer-ribbon">SALE</div>
+
+                <!-- Wishlist Heart Button -->
+                <button class="card-wishlist-btn {% for item in wishlist %}{% if item.id == med._id|string %}active{% endif %}{% endfor %}" 
+                        onclick="toggleWishlist('{{ med._id }}', this)">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+
+                <span class="card-cat-badge">{{ med.category }}</span>
+                <div class="img-wrapper">
+                    <img src="{{ med.image if med.image else 'https://picsum.photos/seed/' + med.name|string + '/200/200.jpg' }}" alt="{{ med.name }}">
+                </div>
+                <h3>{{ med.name }}</h3>
+                <p class="price">${{ med.price }}</p>
+                
+                {% if med.quantity > 10 %}
+                    <p class="stock-tag">In Stock</p>
+                {% elif med.quantity > 0 %}
+                    <p class="stock-tag low">Only {{ med.quantity }} left</p>
+                {% else %}
+                    <p class="stock-tag out">Out of Stock</p>
+                {% endif %}
+
+                {% if med.quantity > 0 %}
+                <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">
+                    <span>Add to Cart</span> <span>+</span>
+                </button>
+                {% else %}
+                <button class="add-btn" disabled>Unavailable</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- TOP SELLING SECTION -->
+    {% if top_medicines|length > 0 %}
+    <section class="top-selling-section">
+        <div class="section-title">🔥 Top Selling Products</div>
+        <div class="top-selling-scroll">
+            {% for med in top_medicines %}
+            <div class="medicine-card" data-category="{{ med.category }}" data-price="{{ med.price }}">
+                <span class="card-cat-badge" style="background:#fef3c7; color:#b45309;">Top Rated</span>
+                <button class="card-wishlist-btn {% for item in wishlist %}{% if item.id == med._id|string %}active{% endif %}{% endfor %}" 
+                        onclick="toggleWishlist('{{ med._id }}', this)">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+
+                <div class="img-wrapper">
+                    <img src="{{ med.image if med.image else 'https://picsum.photos/seed/' + med.name|string + '/200/200.jpg' }}" alt="{{ med.name }}">
+                </div>
+                <h3>{{ med.name }}</h3>
+                <p class="price">${{ med.price }}</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">{{ med.sold }} Sold</p>
+                
+                {% if med.quantity > 0 %}
+                <!-- FIXED: Added 'this' argument to fix button crash -->
+                <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">Add to Cart</button>
+                {% else %}
+                <button class="add-btn" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CAROUSEL BANNER SECTION -->
+    {% if carousel_banners|length > 0 %}
+    <section class="carousel-section">
+        <div class="carousel-container" id="homeCarousel">
+            {% for banner in carousel_banners %}
+            <div class="carousel-slide">
+                <img src="{{ banner.image }}" alt="{{ banner.title }}">
+                <div class="carousel-content">
+                    <h3>{{ banner.title }}</h3>
+                    <p>{{ banner.description }}</p>
+                    <a href="{{ banner.link }}" class="carousel-btn">Shop Now</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- BRANDS SECTION -->
+    {% if brands|length > 0 %}
+    <section class="brands-section">
+        <div class="section-title">🏷️ Shop by Brand</div>
+        <div class="brand-scroll">
+            {% for brand in brands %}
+            <div class="brand-item" onclick="window.location.href='/medicines?search={{ brand.name }}'">
+                <img src="{{ brand.image }}" alt="{{ brand.name }}" class="brand-logo">
+                <span class="brand-name">{{ brand.name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+
+<!-- Deals Section (Codes) -->
+{% if deals|length > 0 %}
+<div class="bottom-deals-section">
+    <div class="container">
+        <div class="section-header">
+            <h3>🎉 Active Offers</h3>
+            <p style="color:var(--text-muted);">Don't miss out on these amazing deals!</p>
+        </div>
+        <div class="bottom-deals-grid">
+            {% for deal in deals %}
+            <div class="deal-card-large">
+                <div class="deal-tag-large">{{ deal.discount }} OFF</div>
+                <div class="deal-title-large">{{ deal.title }}</div>
+                <p style="color:#c2410c; margin-bottom:10px;">{{ deal.description }}</p>
+                <div style="font-size:0.85rem; color:#ea580c; font-weight:600;">Applies to: {{ deal.category }}</div>
+                <div class="deal-code-large">Use Code: {{ deal.code }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h4>PharmaCare</h4>
+            <p style="color: #cbd5e1; line-height: 1.6;">Your trusted online pharmacy. We provide genuine medicines and healthcare products at your doorstep.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/medicines">All Medicines</a></li>
+                <li><a href="/user/receipts">My Orders</a></li>
+                <li><a href="#">Track Order</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Categories</h4>
+            <ul>
+                <li><a href="/medicines">Pain Relief</a></li>
+                <li><a href="/medicines">Antibiotics</a></li>
+                <li><a href="/medicines">Vitamins</a></li>
+                <li><a href="/medicines">Skin Care</a></li>
+                <li><a href="/medicines">Supplements</a></li>
+                <li><a href="/medicines">Baby Care</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Contact</h4>
+            <ul>
+                <li>support@pharmacare.com</li>
+                <li>+1 (555) 123-4567</li>
+                <li>123 Health Ave, NY</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2023 PharmaCare. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- Side Navbar -->
+<aside id="sideNav">
+    <span class="close-nav" onclick="toggleSideNav()">✖</span>
+    <h2>Menu</h2>
+    <a href="#" onclick="openProfileModal(); toggleSideNav()" class="menu-link">👤 My Profile</a>
+    <a href="/user/receipts" class="menu-link">🧾 My Orders</a>
+    <a href="#" onclick="openContactModal(); toggleSideNav()" class="menu-link">📧 Contact Us</a>
+    <a href="/logout" class="menu-link" style="color:var(--danger); background:#fef2f2;">🚪 Logout</a>
+</aside>
+
+<!-- Wishlist Sidebar -->
+<div id="wishlistSidebar" class="sidebar-drawer">
+    <div class="drawer-header">
+        <h2>My Wishlist</h2>
+        <span class="close-nav" onclick="toggleWishlistSidebar()">✖</span>
+    </div>
+    <div class="drawer-body" id="wishlistItems">
+        <!-- Rendered via JS -->
+    </div>
+    <div class="drawer-footer">
+        <button class="checkout-btn" onclick="moveAllToCart()" style="background: linear-gradient(90deg, var(--wishlist), #be123c);">Move All to Cart</button>
+    </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar" class="sidebar-drawer">
+    <div class="drawer-header">
+        <h2>Your Cart</h2>
+        <span class="close-nav" onclick="toggleCart()">✖</span>
+    </div>
+    <div class="drawer-body" id="cartItems">
+        {% for item in cart %}
+        <div class="sidebar-item">
+            <img src="{{ item.image if item.image else 'https://picsum.photos/seed/' + item.name|string + '/100/100.jpg' }}" alt="{{ item.name }}">
+            <div class="item-details">
+                <h4>{{ item.name }}</h4>
+                <p>${{ item.price }}</p>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart('{{ item.id }}')" title="Remove item">🗑</button>
+        </div>
+        {% endfor %}
+        {% if cart|length == 0 %}
+            <div style="text-align:center; margin-top:50px; color:var(--text-muted);">
+                <p>Your cart is empty.</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="drawer-footer">
+        {% if cart|length > 0 %}
+        <button class="checkout-btn" onclick="window.location.href='/checkout'">Proceed to Checkout</button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileModal">
+    <div class="modal">
+        <span class="close-modal" onclick="closeProfileModal()">✖</span>
+        <h2>Update Profile</h2>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="profileName" value="{{ user.name }}">
+        </div>
+        <div class="form-group">
+            <label>Email (Cannot be changed)</label>
+            <input type="email" id="profileEmail" value="{{ user.email }}" disabled style="background:#e2e8f0; color:#64748b;">
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="profilePhone" value="{{ user.phone if user.phone else '' }}" placeholder="Add phone number">
+        </div>
+        <button class="modal-btn" onclick="updateProfile()">Save Changes</button>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div id="contactModal">
+    <div class="modal contact-modal-enhanced">
+        <span class="close-modal" onclick="closeContactModal()" style="z-index: 10; color: white; right: 20px;">✖</span>
+        <div class="contact-left">
+            <h3>Get in touch</h3>
+            <p>We'd love to hear from you. Our team is ready to answer all your questions.</p>
+            <div class="contact-info-item">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                <span>support@pharmacare.com</span>
+            </div>
+            <div class="contact-info-item">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                <span>+1 (555) 123-4567</span>
+            </div>
+            <div class="contact-info-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5 2.5 2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5z"/></svg>
+                <span>123 Health Ave, NY</span>
+            </div>
+        </div>
+        <div class="contact-right">
+            <h2>Contact Us</h2>
+            <span class="subtitle">Fill out form and we'll get back to you.</span>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="contactName" value="{{ user.name }}">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="contactEmail" value="{{ user.email }}">
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <select id="contactSubject" style="cursor:pointer;">
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="Order Support">Order Support</option>
+                    <option value="Feedback">Feedback</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="contactMessage" rows="4" placeholder="How can we help you?"></textarea>
+            </div>
+            <button class="modal-btn" onclick="sendMessage()">Send Message 🚀</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+<script>
+function toggleSideNav() { const sideNav = document.getElementById('sideNav'); sideNav.classList.toggle('open'); }
+function toggleCart() { document.getElementById('cartSidebar').classList.toggle('open'); }
+function toggleWishlistSidebar() { document.getElementById('wishlistSidebar').classList.toggle('open'); }
+
+function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
+function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+function openContactModal() { document.getElementById('contactModal').style.display = 'flex'; }
+function closeContactModal() { document.getElementById('contactModal').style.display = 'none'; }
+
+function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>{ toast.style.display='none'; toast.style.opacity='1'; },300); },3000);
+}
+
+function updateProfile() {
+    const name = document.getElementById('profileName').value;
+    const phone = document.getElementById('profilePhone').value;
+    if(!name) { showToast("Name is required"); return; }
+    fetch("/user/update_profile", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({name, phone})
+    }).then(res => res.json()).then(data => {
+        showToast(data.message);
+        if(data.success) { closeProfileModal(); setTimeout(() => location.reload(), 1000); }
+    });
+}
+
+function sendMessage() {
+    const name = document.getElementById('contactName').value;
+    const email = document.getElementById('contactEmail').value;
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value;
+    if(!message) { showToast("Please write a message"); return; }
+    if(!email) { showToast("Email is required"); return; }
+    fetch("/contact", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({name, email, subject, message})
+    }).then(res => res.json()).then(data => {
+        showToast(data.message);
+        if(data.success) { closeContactModal(); document.getElementById('contactMessage').value = ""; }
+    });
+}
+
+// ---------------- WISHLIST LOGIC ----------------
+function toggleWishlist(med_id, btnElement) {
+    const isActive = btnElement.classList.contains('active');
+    if (isActive) {
+        btnElement.classList.remove('active');
+        fetch("/user/remove_from_wishlist", { 
+            method: "POST", headers: {"Content-Type": "application/json"}, 
+            body: JSON.stringify({med_id}) 
+        }).then(res => res.json()).then(data => {
+            updateWishlistUI(data.wishlist);
+        });
+    } else {
+        btnElement.classList.add('active');
+        fetch("/user/add_to_wishlist", { 
+            method: "POST", headers: {"Content-Type": "application/json"}, 
+            body: JSON.stringify({med_id}) 
+        }).then(res => res.json()).then(data => {
+            updateWishlistUI(data.wishlist);
+            showToast("Added to Wishlist ❤️");
+        }).catch(() => { btnElement.classList.remove('active'); });
+    }
+}
+
+function updateWishlistUI(wishlistData){
+    const wishlistContainer = document.getElementById('wishlistItems');
+    const wishlistCount = document.getElementById('wishlistCount');
+    wishlistContainer.innerHTML = "";
+    wishlistCount.textContent = wishlistData.length;
+    if(wishlistData.length === 0){
+        wishlistContainer.innerHTML = `<div style="text-align:center; margin-top:50px; color:var(--text-muted);"><p>Your wishlist is empty.</p></div>`;
+    } else {
+        wishlistData.forEach(item=>{
+            const div = document.createElement('div'); div.className = 'sidebar-item';
+            div.innerHTML = `
+                <img src="${item.image || 'https://picsum.photos/seed/' + item.name + '/100/100.jpg'}" alt="${item.name}">
+                <div class="item-details">
+                    <h4>${item.name}</h4>
+                    <p>$${item.price}</p>
+                    <button class="add-cart-from-wishlist" onclick="moveToCart('${item.id}')">Add to Cart</button>
+                </div>
+                <button class="remove-btn" onclick="removeFromWishlist('${item.id}')" title="Remove item">🗑</button>`;
+            wishlistContainer.appendChild(div);
+        });
+    }
+}
+
+function removeFromWishlist(med_id) {
+    const heartBtn = document.querySelector(`.card-wishlist-btn[onclick*="${med_id}"]`);
+    if(heartBtn) heartBtn.classList.remove('active');
+    fetch("/user/remove_from_wishlist", { 
+        method: "POST", headers: {"Content-Type": "application/json"}, 
+        body: JSON.stringify({med_id}) 
+    }).then(res => res.json()).then(data => {
+        updateWishlistUI(data.wishlist);
+    });
+}
+
+function moveToCart(med_id) {
+    const cardBtn = document.querySelector(`.add-btn[onclick*="${med_id}"]`);
+    if(cardBtn) addToCart(med_id, cardBtn);
+    else addToCartDirect(med_id);
+}
+
+function addToCartDirect(med_id) {
+    fetch("/user/add_to_cart", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+    .then(res => res.json()).then(data => {
+        if(data.cart){ updateCartUI(data.cart); showToast("Added to cart!"); removeFromWishlist(med_id); }
+        else showToast(data.message);
+    });
+}
+
+function moveAllToCart() {
+    const wishlistItems = document.querySelectorAll('#wishlistItems .sidebar-item');
+    if(wishlistItems.length === 0) return;
+    let processed = 0;
+    wishlistItems.forEach(item => {
+        const addBtn = item.querySelector('.add-cart-from-wishlist');
+        if(addBtn) addBtn.click();
+        processed++;
+    });
+    if(processed > 0) showToast("Processing items...");
+}
+
+// ---------------- CART LOGIC ----------------
+function addToCart(med_id, btn){
+    const originalContent = btn.innerHTML;
+    // Safety check for btn
+    if(!btn) {
+        fetch("/user/add_to_cart", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+        .then(res => res.json()).then(data => {
+            if(data.cart){ updateCartUI(data.cart); showToast("Added to cart!"); }
+        });
+        return;
+    }
+
+    btn.innerHTML = "Adding..."; btn.disabled = true;
+    fetch("/user/add_to_cart", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+    .then(res => res.json()).then(data => {
+        if(data.cart){ 
+            updateCartUI(data.cart); showToast(`Added to cart!`);
+            btn.innerHTML = "Added ✔"; btn.style.background = "var(--primary)";
+            setTimeout(()=>{ btn.innerHTML = originalContent; btn.disabled = false; },1500);
+        } else { 
+            showToast(data.message); btn.innerHTML = originalContent; btn.disabled = false; 
+        }
+    }).catch(err => { 
+        showToast("Error adding item"); btn.innerHTML = originalContent; btn.disabled = false; 
+    });
+}
+
+function removeFromCart(med_id){
+    fetch("/user/remove_from_cart", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+    .then(res => res.json()).then(data => {
+        if(data.cart){ updateCartUI(data.cart); showToast("Removed from cart"); } else { showToast(data.message); }
+    });
+}
+
+function updateCartUI(cartData){
+    const cartItems = document.getElementById('cartItems');
+    const cartCount = document.getElementById('cartCount');
+    cartItems.innerHTML = "";
+    if(cartData.length === 0){
+        cartItems.innerHTML = `<div style="text-align:center; margin-top:50px; color:var(--text-muted);"><p>Your cart is empty.</p></div>`;
+        document.querySelector('.checkout-btn')?.remove();
+    } else {
+        cartData.forEach(item=>{
+            const div = document.createElement('div'); div.className = 'sidebar-item';
+            div.innerHTML = `<img src="${item.image || 'https://picsum.photos/seed/' + item.name + '/100/100.jpg'}" alt="${item.name}">
+                <div class="item-details"><h4>${item.name}</h4><p>$${item.price}</p></div>
+                <button class="remove-btn" onclick="removeFromCart('${item.id}')" title="Remove item">🗑</button>`;
+            cartItems.appendChild(div);
+        });
+        let checkoutBtn = document.querySelector('.checkout-btn');
+        if(!checkoutBtn){ 
+            checkoutBtn = document.createElement('button'); checkoutBtn.className='checkout-btn'; 
+            checkoutBtn.textContent='Proceed to Checkout'; checkoutBtn.onclick=()=>window.location.href='/checkout'; 
+            document.querySelector('#cartSidebar .drawer-footer').appendChild(checkoutBtn); 
+        }
+    }
+    cartCount.textContent = cartData.length;
+}
+
+// ---------------- FILTER LOGIC ----------------
+// Global state for filters
+let currentCategory = 'All';
+let currentPrice = 'Any';
+
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    // Search applies to ALL grids (Main Grid + Top Selling)
+    document.querySelectorAll('.medicine-card').forEach(card => {
+        const name = card.querySelector('h3').innerText.toLowerCase();
+        const category = card.getAttribute('data-category');
+        if(name.includes(term) || category.includes(term)) { card.style.display = 'flex'; } else { card.style.display = 'none'; }
+    });
+});
+
+function filterCategory(category, event){ 
+    currentCategory = category;
+    document.querySelectorAll('.filters-container .filter-btn').forEach(btn => { if(btn.textContent.includes('$')) return; btn.classList.remove('active'); });
+    event.target.classList.add('active'); 
+    applyFilters();
+}
+
+function filterPrice(priceRange, event){
+    currentPrice = priceRange;
+    document.querySelectorAll('.filters-container .filter-btn').forEach(btn => { if(!btn.textContent.includes('$')) return; btn.classList.remove('active'); });
+    event.target.classList.add('active'); 
+    applyFilters();
+}
+
+function applyFilters(){
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+    
+    // NOTE: Category and Price filters ONLY apply to the Main Grid (#dealsGrid)
+    // The Top Selling list is a curated list and usually shouldn't disappear based on category filters.
+    // Search applies to everything.
+    
+    const mainGridCards = document.querySelectorAll('#dealsGrid .medicine-card');
+    
+    mainGridCards.forEach(card=>{
+        const name = card.querySelector('h3').innerText.toLowerCase();
+        const category = card.getAttribute('data-category');
+        const price = parseFloat(card.getAttribute('data-price'));
+        
+        let matchCat = currentCategory==='All' || category===currentCategory;
+        let matchPrice = true;
+        if(currentPrice === 'under10'){ matchPrice = price<10; }
+        else if(currentPrice === '10to50'){ matchPrice = price>=10 && price<=50; }
+        else if(currentPrice === 'above50'){ matchPrice = price>50; }
+        
+        // Always check search text
+        const matchSearch = name.includes(searchText) || category.includes(searchText);
+
+        const isVisible = matchSearch && matchCat && matchPrice;
+        card.style.display = isVisible ? 'flex' : 'none';
+    });
+}
+
+// Window Click Handler
+window.onclick = function(event) {
+    const modal = document.getElementById('profileModal');
+    const contactModal = document.getElementById('contactModal');
+    const sideNav = document.getElementById('sideNav');
+    const hamburger = document.querySelector('.hamburger');
+    if (event.target == modal) closeProfileModal();
+    if (event.target == contactModal) closeContactModal();
+    if (sideNav.classList.contains('open') && !sideNav.contains(event.target) && !hamburger.contains(event.target)) {
+        sideNav.classList.remove('open');
+    }
+}
+</script>
+</body>
+</html>

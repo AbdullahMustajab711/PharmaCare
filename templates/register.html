@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pharmacy Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="floating-form">
+    <div class="header">
+        <h1>💊 PharmaCare</h1>
+        <p>Register your pharmacy account</p>
+    </div>
+
+    <form id="registerForm">
+        <div class="input-group">
+            <input type="text" id="owner_name" required>
+            <label>Owner Full Name</label>
+        </div>
+
+        <div class="input-group">
+            <input type="email" id="reg_email" required>
+            <label>Email Address</label>
+        </div>
+
+        <div class="input-group">
+            <input type="tel" id="phone" required>
+            <label>Phone Number</label>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="reg_password" required>
+            <label>Password</label>
+        </div>
+
+        <button type="submit">Create Account</button>
+        <p id="msg"></p>
+    </form>
+
+    <p style="margin-top:15px; color:#ffffff;">
+        Already have an account? <a href="/login" style="color:#b2f5ea; text-decoration:none;">Login</a>
+    </p>
+</div>
+
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+</body>
+</html>

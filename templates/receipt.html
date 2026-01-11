@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt - PharmaCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root {
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --bg-body: #f0fdfa;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --success: #10b981;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --radius: 16px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+    body { background:var(--bg-body); color:var(--text-main); min-height:100vh; display:flex; flex-direction:column; }
+
+    /* Navbar (Simplified) */
+    nav {
+        display:flex; justify-content:center; padding:1rem 2rem;
+        background:#fff; border-radius:var(--radius); margin:20px;
+        box-shadow:var(--shadow); max-width:800px; margin-left:auto; margin-right:auto;
+    }
+    .brand { font-size:24px; font-weight:700; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; cursor:pointer;}
+
+    /* Receipt Container */
+    .container { 
+        flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; 
+        padding-bottom: 50px; padding-left: 20px; padding-right: 20px;
+    }
+    
+    .receipt-card {
+        background:var(--bg-card); width:100%; max-width:700px;
+        border-radius:var(--radius); box-shadow:var(--shadow);
+        overflow:hidden;
+        position: relative;
+    }
+
+    /* Top Success Strip */
+    .success-header {
+        background: var(--success); color: white;
+        padding: 30px; text-align: center;
+    }
+    .icon-circle {
+        width: 60px; height: 60px; background: rgba(255,255,255,0.2);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 15px; font-size: 32px;
+    }
+    .success-header h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 5px; }
+    .success-header p { opacity: 0.9; font-size: 0.9rem; }
+
+    /* Receipt Body */
+    .receipt-body { padding: 40px; }
+    
+    .section-title { font-size: 1.1rem; font-weight: 700; color:var(--primary); margin-bottom: 20px; border-bottom: 2px solid var(--bg-body); padding-bottom: 10px; }
+    
+    .details-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+    .detail-item label { display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:5px; text-transform:uppercase; }
+    .detail-item span { font-weight:600; color:var(--text-main); font-size: 1rem; }
+
+    /* Items Table */
+    .items-list { margin-bottom: 30px; }
+    .item-row {
+        display:flex; justify-content:space-between; align-items:center;
+        padding: 15px 0; border-bottom: 1px dashed var(--border);
+    }
+    .item-left { display:flex; align-items:center; gap:15px; }
+    .item-img { width:50px; height:50px; border-radius:8px; object-fit:contain; background:#f8fafc; }
+    .item-name { font-weight:600; font-size:0.95rem; }
+    .item-price { font-weight:700; color:var(--primary); }
+
+    /* Totals */
+    .totals-area { background:var(--bg-body); padding:20px; border-radius:12px; }
+    .total-row { display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.95rem; }
+    .final-total { display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top:2px solid var(--border); font-size:1.5rem; font-weight:700; color:var(--primary); }
+
+    /* Action Button */
+    .action-area { text-align:center; margin-top:40px; }
+    .btn-home {
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        color: #fff; padding: 12px 40px; border: none; border-radius: 30px;
+        font-size: 1.1rem; font-weight: 600; cursor: pointer;
+        box-shadow: 0 4px 15px rgba(15, 118, 110, 0.3);
+        transition: 0.3s; text-decoration: none; display: inline-block;
+    }
+    .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 118, 110, 0.4); }
+
+    /* Mobile */
+    @media(max-width:600px) {
+        .details-grid { grid-template-columns: 1fr; gap: 15px; }
+        .receipt-body { padding: 20px; }
+    }
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="brand" onclick="window.location.href='/home'">
+        <span>💊</span> PharmaCare
+    </div>
+</nav>
+
+<div class="container">
+    <div class="receipt-card">
+        
+        <!-- Success Header -->
+        <div class="success-header">
+            <div class="icon-circle">✓</div>
+            <h1>Payment Successful!</h1>
+            <p>Thank you for your order, {{ order.user_name }}.</p>
+        </div>
+
+        <div class="receipt-body">
+            
+            <!-- Order Details -->
+            <div class="details-grid">
+                <div class="detail-item">
+                    <label>Order ID</label>
+                    <span>#{{ order._id[-6:] }}</span> <!-- Showing last 6 chars for brevity -->
+                </div>
+                <div class="detail-item">
+                    <label>Order Date</label>
+                    <span>{{ order.date.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Payment Method</label>
+                    <span>Card ending in **** {{ order.payment_info.card_last4 }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Shipping Email</label>
+                    <span>{{ order.user_email }}</span>
+                </div>
+            </div>
+
+            <!-- Items List -->
+            <div class="section-title">Order Items</div>
+            <div class="items-list">
+                {% for item in order.cart %}
+                <div class="item-row">
+                    <div class="item-left">
+                        <img src="{{ item.image or '/static/images/default.png' }}" class="item-img" alt="{{ item.name }}">
+                        <div class="item-name">{{ item.name }}</div>
+                    </div>
+                    <div class="item-price">${{ "%.2f"|format(item.price) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Totals -->
+            <div class="totals-area">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>${{ "%.2f"|format(order.total) }}</span>
+                </div>
+                <div class="total-row" style="color:var(--text-muted); font-size:0.85rem;">
+                    <span>Tax & Shipping</span>
+                    <span>Free</span>
+                </div>
+                <div class="final-total">
+                    <span>Total Paid</span>
+                    <span>${{ "%.2f"|format(order.total) }}</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="action-area">
+        <a href="/home" class="btn-home">Continue Shopping</a>
+    </div>
+</div>
+
+</body>
+</html>

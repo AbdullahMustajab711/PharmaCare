@@ -1,0 +1,111 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.floating-form {
+    width: 400px;
+    padding: 40px 30px;
+    text-align: center;
+    animation: slideUp 0.8s ease;
+}
+
+.header h1 {
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.header p {
+    color: #e0f2f1;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 22px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 30px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 15px;
+    outline: none;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+
+.input-group label {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    color: rgba(255,255,255,0.6);
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: 0.3s ease;
+}
+
+.input-group input:focus + label,
+.input-group input:valid + label {
+    top: -10px;
+    font-size: 12px;
+    color: #ffffff;
+}
+
+input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+input:focus {
+    box-shadow: 0 0 20px rgba(255,255,255,0.25);
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ffffff, #b2f5ea);
+    color: #0f766e;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(255,255,255,0.35);
+}
+
+#msg {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pharmacy Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="floating-form">
+    <div class="header">
+        <h1>💊 PharmaCare</h1>
+        <p>Login to your pharmacy account</p>
+    </div>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="email" id="login_email" required>
+            <label>Email Address</label>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="login_password" required>
+            <label>Password</label>
+        </div>
+
+        <button type="submit">Login</button>
+        <p id="msg"></p>
+    </form>
+
+    <p style="margin-top:15px; color:#ffffff;">
+        Don't have an account? <a href="/register" style="color:#b2f5ea; text-decoration:none;">Register</a>
+    </p>
+</div>
+
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Order History - PharmaCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root {
+        /* EXACT SAME VARIABLES AS STORE PAGE */
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --primary-dark: #0d5e56;
+        --secondary: #ccfbf1;
+        --accent: #f59e0b;
+        --danger: #ef4444;
+        --bg-body: #f0fdfa;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius: 12px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background:var(--bg-body); color:var(--text-main); overflow-x:hidden; }
+
+    /* Navbar (COPIED FROM STORE) */
+    nav { 
+        display:flex; justify-content:space-between; align-items:center; 
+        padding:1rem 2rem; 
+        background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+        color:var(--primary); position:sticky; top:0; z-index:100; 
+        box-shadow:var(--shadow-sm); border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .brand { display:flex; align-items:center; gap:10px; cursor:pointer; }
+    .brand h1 { font-size:24px; font-weight:700; background: linear-gradient(90deg, var(--primary), var(--primary-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .nav-center { flex:1; margin:0 40px; }
+    nav input { 
+        width:100%; padding:12px 20px; border-radius:50px; 
+        border:1px solid #e2e8f0; background:#f8fafc; outline:none; 
+        transition:0.3s; color:var(--text-main);
+    }
+    nav input:focus { background:#fff; border-color:var(--primary); box-shadow:0 0 0 3px rgba(20, 184, 166, 0.2); }
+    
+    .nav-actions { display:flex; align-items:center; gap:20px; }
+    .nav-btn { cursor:pointer; font-size:20px; color:var(--text-muted); transition:0.3s; position:relative; background:none; border:none; }
+    .nav-btn:hover { color:var(--primary); transform:translateY(-2px); }
+    .hamburger { display:none; font-size:24px; }
+
+    /* Container */
+    .container { max-width:1300px; margin:0 auto; padding:20px; min-height: 80vh; }
+
+    /* Header Section (Consistent with Store Theme) */
+    .page-header {
+        background: white;
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .page-header h2 { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+    .page-header p { color: var(--text-muted); margin-top: 5px; }
+
+    /* Grid Layout */
+    .orders-grid { 
+        display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:25px; 
+    }
+
+    /* Order Card (Styled like Medicine Cards) */
+    .order-card { 
+        background:var(--bg-card); 
+        border-radius:16px; /* Match Store Card Radius */
+        padding:25px; 
+        box-shadow:var(--shadow-sm); 
+        transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        display:flex; flex-direction:column; justify-content:space-between;
+        position:relative; border:1px solid transparent;
+        cursor: pointer;
+    }
+    .order-card:hover { 
+        transform:translateY(-6px); /* Match Store Card Hover */
+        box-shadow:var(--shadow-lg); 
+        border-color:var(--secondary); 
+    }
+
+    /* Card Content */
+    .card-top {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 15px; padding-bottom: 15px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    .order-id { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .order-date { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+    
+    .order-total-group { text-align: right; }
+    .total-label { font-size: 0.8rem; color: var(--text-muted); }
+    .total-amount { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+
+    .card-bottom { margin-top: 10px; }
+    .item-count { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px; display: block; }
+    
+    .btn-view {
+        width: 100%; padding: 12px; border: none; border-radius: 10px;
+        background: var(--primary); color: white; font-weight: 600; cursor: pointer;
+        transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        text-decoration: none;
+    }
+    .btn-view:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    /* Empty State */
+    .empty-state {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 16px;
+        padding: 60px 20px;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border: 2px dashed var(--border);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.8; }
+    .empty-title { font-size: 1.5rem; color: var(--text-main); margin-bottom: 10px; font-weight: 700; }
+    .empty-desc { color: var(--text-muted); margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .btn-start { 
+        display:inline-block; padding:12px 30px; background:var(--secondary); 
+        color:var(--primary-dark); text-decoration:none; border-radius:30px; 
+        font-weight:600; transition:0.2s; border: 1px solid var(--primary-light);
+    }
+    .btn-start:hover { background:var(--primary); color:white; }
+
+    /* Side Navbar (Slide Bar - SAME AS STORE) */
+    #sideNav { 
+        position: fixed; left: -300px; top: 0; width: 280px; height: 100%; 
+        background:#fff; color:var(--text-main); padding: 25px; 
+        transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 300; 
+        box-shadow: 5px 0 25px rgba(0,0,0,0.1); 
+        display: flex; flex-direction: column;
+    }
+    #sideNav.open { left: 0; }
+    
+    #sideNav h2 { margin-bottom:20px; color:var(--primary); font-size:1.5rem; }
+    
+    .user-summary {
+        background: var(--bg-body);
+        padding: 15px;
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+        text-align: center;
+    }
+    .user-summary h3 { font-size: 1rem; color: var(--primary-dark); margin-bottom: 4px; }
+    .user-summary p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .menu-link { 
+        display:flex; align-items: center; gap: 10px;
+        margin: 10px 0; padding: 12px 15px; border-radius:12px; 
+        background:#f8fafc; color:var(--text-main); text-decoration:none; 
+        font-weight:500; transition:0.2s; border:1px solid transparent;
+    }
+    .menu-link:hover { background:var(--secondary); color:var(--primary-dark); }
+    .menu-link.active { background:var(--primary); color:white; box-shadow: 0 4px 6px rgba(15, 118, 110, 0.2); }
+    .logout-link { color: var(--danger); background: #fef2f2; }
+    .logout-link:hover { background: #fee2e2; }
+
+    .close-nav { position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer; color:var(--text-muted); }
+
+    /* Toast (Same as Store) */
+    #toast { 
+        position:fixed; bottom:30px; right:30px; background:var(--text-main); color:#fff; 
+        padding:15px 25px; border-radius:8px; display:none; z-index:500; 
+        box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Responsive */
+    @media(max-width:900px){
+        nav { flex-wrap:wrap; padding:1rem; }
+        .nav-center { order:3; width:100%; margin:10px 0 0 0; }
+        .nav-actions { gap:15px; }
+        .hamburger { display:block; margin-left:auto; }
+        .container { padding: 15px; }
+    }
+</style>
+</head>
+<body>
+
+<!-- Navbar (Identical to Store) -->
+<nav>
+    <div class="brand" onclick="window.location.href='/home'">
+        <span style="font-size:28px;">💊</span>
+        <h1>PharmaCare</h1>
+    </div>
+    
+    <div class="nav-center">
+        <input type="text" placeholder="Search order ID..." id="searchInput">
+    </div>
+
+    <div class="nav-actions">
+        <button class="nav-btn hamburger" onclick="toggleSideNav()">☰</button>
+        <button class="nav-btn" onclick="window.location.href='/home'">🏠</button>
+    </div>
+</nav>
+
+<!-- Side Navbar (Identical to Store) -->
+<aside id="sideNav">
+    <span class="close-nav" onclick="toggleSideNav()">✖</span>
+    
+    {% if user %}
+    <div class="user-summary">
+        <h3>{{ user.name }}</h3>
+        <p>{{ user.email }}</p>
+    </div>
+    {% endif %}
+
+    <h2>Menu</h2>
+    <a href="/home" onclick="toggleSideNav()" class="menu-link">
+        <span>🏠 Shop Home</span>
+    </a>
+    <a href="/user/receipts" onclick="toggleSideNav()" class="menu-link active">
+        <span>🧾 My Orders</span>
+    </a>
+    <a href="#" onclick="window.location.href='/home'" class="menu-link">
+        <span>📧 Contact Us</span>
+    </a>
+    <a href="/logout" onclick="toggleSideNav()" class="menu-link logout-link">
+        <span>🚪 Logout</span>
+    </a>
+</aside>
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <span style="font-size: 32px;">🧾</span>
+        <div>
+            <h2>Order History</h2>
+            <p>View receipts for your past purchases.</p>
+        </div>
+    </div>
+
+    {% if all_orders|length > 0 %}
+        <div class="orders-grid">
+            {% for o in all_orders %}
+            <div class="order-card" onclick="window.location.href='/receipt/{{ o._id }}'">
+                <div class="card-top">
+                    <div>
+                        <div class="order-id">Order #{{ o._id[-6:] }}</div>
+                        <div class="order-date">{{ o.date.strftime('%B %d, %Y') }}</div>
+                    </div>
+                    <div class="order-total-group">
+                        <div class="total-label">Paid</div>
+                        <div class="total-amount">${{ "%.2f"|format(o.get('total', 0)) }}</div>
+                    </div>
+                </div>
+
+                <div class="card-bottom">
+                    <span class="item-count">{{ o.cart|length }} Items in this order</span>
+                    <a href="/receipt/{{ o._id }}" class="btn-view">View Receipt ➜</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h2 class="empty-title">No Orders Found</h2>
+            <p class="empty-desc">Looks like you haven't placed any orders yet. Start shopping to see your history here.</p>
+            <a href="/home" class="btn-start">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+<script>
+// Sidebar Toggle (Same as Store)
+function toggleSideNav() { 
+    const sideNav = document.getElementById('sideNav');
+    sideNav.classList.toggle('open'); 
+}
+
+// Search functionality (Filters Orders by ID)
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const filter = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.order-card');
+    
+    cards.forEach(card => {
+        const idText = card.querySelector('.order-id').innerText.toLowerCase();
+        if (idText.includes(filter)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Close modal/sidebar if clicking outside (optional UX enhancement)
+window.onclick = function(event) {
+    const sideNav = document.getElementById('sideNav');
+    const hamburger = document.querySelector('.hamburger');
+    // If click is outside sidebar and not on hamburger
+    if (event.target != sideNav && !sideNav.contains(event.target) && event.target != hamburger && !hamburger.contains(event.target)) {
+        if(sideNav.classList.contains('open')){
+            sideNav.classList.remove('open');
+        }
+    }
+}
+</script>
+</body>
+</html>

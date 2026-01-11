@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checkout - PharmaCare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root {
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --primary-dark: #0d5e56;
+        --secondary: #ccfbf1;
+        --accent: #f59e0b;
+        --danger: #ef4444;
+        --bg-body: #f0fdfa;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --radius: 12px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+    body { background:var(--bg-body); color:var(--text-main); padding: 20px; }
+
+    /* Navbar (Simplified) */
+    nav {
+        display:flex; justify-content:center; padding:1rem 2rem;
+        background:#fff; border-radius:var(--radius); margin-bottom:30px;
+        box-shadow:var(--shadow); max-width:1200px; margin-left:auto; margin-right:auto;
+    }
+    .brand { font-size:24px; font-weight:700; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:8px; cursor:pointer;}
+
+    /* Main Layout */
+    .checkout-wrapper {
+        display:grid; grid-template-columns: 1.5fr 1fr; gap:30px;
+        max-width:1200px; margin:0 auto; padding-bottom:50px;
+    }
+
+    /* Card Containers */
+    .card { background:#fff; border-radius:var(--radius); padding:30px; box-shadow:var(--shadow); height:fit-content; }
+    
+    .section-title { font-size:1.25rem; font-weight:600; color:var(--primary); margin-bottom:20px; border-bottom:2px solid var(--secondary); padding-bottom:10px; }
+
+    /* User Info */
+    .info-row { display:flex; justify-content:space-between; margin-bottom:15px; font-size:0.95rem; }
+    .info-label { color:var(--text-muted); font-weight:500; }
+    .info-val { font-weight:600; }
+
+    /* Cart Items List */
+    .cart-list { max-height:400px; overflow-y:auto; margin-bottom:20px; padding-right:5px; }
+    .cart-item-row {
+        display:flex; align-items:center; gap:15px; padding:15px;
+        border:1px solid #f1f5f9; border-radius:10px; margin-bottom:10px;
+        background:#f8fafc;
+    }
+    .item-img { width:50px; height:50px; object-fit:contain; border-radius:6px; }
+    .item-details { flex:1; }
+    .item-name { font-weight:600; font-size:0.95rem; }
+    .price-group { text-align:right; }
+    .orig-price { text-decoration:line-through; color:var(--text-muted); font-size:0.8rem; }
+    .final-price { font-weight:700; color:var(--primary); font-size:1.1rem; }
+    .discount-badge { background:#dcfce7; color:#166534; font-size:0.7rem; padding:2px 6px; border-radius:4px; font-weight:600; display:inline-block; margin-top:4px; }
+
+    /* Totals Summary */
+    .summary-row { display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.95rem; }
+    .total-row { font-size:1.3rem; font-weight:700; color:var(--primary); margin-top:20px; padding-top:15px; border-top:2px dashed #e2e8f0; }
+    .savings-text { color:var(--success); font-weight:600; text-align:right; font-size:0.9rem; margin-bottom:10px; }
+
+    /* Payment Form */
+    .form-group { margin-bottom:15px; }
+    .form-group label { display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; }
+    .form-group input { 
+        width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; 
+        background:#f8fafc; outline:none; transition:0.2s; 
+    }
+    .form-group input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 2px rgba(15,118,110,0.1); }
+    
+    .card-icons-row { display:flex; gap:10px; margin-bottom:20px; color:var(--text-muted); font-size:1.5rem; text-align:center; }
+    
+    .pay-btn {
+        width:100%; padding:15px; background:linear-gradient(90deg, var(--primary), var(--primary-light)); 
+        color:#fff; border:none; border-radius:8px; font-size:1.1rem; font-weight:600; cursor:pointer;
+        box-shadow:0 4px 6px -1px rgba(15, 118, 110, 0.3); transition:0.3s;
+    }
+    .pay-btn:hover { box-shadow:0 10px 15px -3px rgba(15, 118, 110, 0.4); transform:translateY(-2px); }
+
+    /* Toast */
+    #toast {
+        position:fixed; bottom:20px; right:20px; background:var(--text-main); color:#fff;
+        padding:15px 25px; border-radius:8px; display:none; z-index:500;
+        animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Responsive */
+    @media(max-width:768px) {
+        .checkout-wrapper { grid-template-columns: 1fr; }
+        body { padding: 10px; }
+    }
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="brand" onclick="window.location.href='/home'">
+        <span>💊</span> PharmaCare
+    </div>
+</nav>
+
+<div class="checkout-wrapper">
+    
+    <!-- Left: Order Summary -->
+    <div class="card">
+        <div class="section-title">Order Summary</div>
+        
+        <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-val">{{ user.name }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-val">{{ user.email }}</span>
+        </div>
+
+        <div class="cart-list">
+            {% for item in cart %}
+            <div class="cart-item-row">
+                <img src="{{ item.image or '/static/images/default.png' }}" alt="{{ item.name }}" class="item-img">
+                <div class="item-details">
+                    <div class="item-name">{{ item.name }}</div>
+                    {% if item.discount_percent > 0 %}
+                    <div class="discount-badge">🔥 {{ item.discount_percent|int }}% OFF Applied</div>
+                    {% endif %}
+                </div>
+                <div class="price-group">
+                    {% if item.discount_percent > 0 %}
+                    <div class="orig-price">${{ "%.2f"|format(item.original_price) }}</div>
+                    {% endif %}
+                    <div class="final-price">${{ "%.2f"|format(item.final_price) }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="summary-section">
+            {% if total_savings > 0 %}
+            <div class="savings-text">
+                🎉 You saved ${{ "%.2f"|format(total_savings) }} on this order!
+            </div>
+            {% endif %}
+            
+            <div class="total-row">
+                <span>Total Amount</span>
+                <span>${{ "%.2f"|format(subtotal) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Payment Form -->
+    <div class="card">
+        <div class="section-title">Payment Details</div>
+        
+        <form id="paymentForm" onsubmit="event.preventDefault(); completePayment();">
+            <div class="form-group">
+                <label>Cardholder Name</label>
+                <input type="text" id="cardName" placeholder="John Doe" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Card Number</label>
+                <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                </div>
+                <div class="form-group">
+                    <label>CVV</label>
+                    <input type="password" id="cvv" placeholder="123" maxlength="3" required>
+                </div>
+            </div>
+
+            <div class="card-icons-row">
+                💳 💳 💳
+            </div>
+
+            <button type="submit" class="pay-btn">Pay ${{ "%.2f"|format(subtotal) }}</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(()=>{ 
+        toast.style.opacity = '0'; 
+        setTimeout(()=>{ toast.style.display='none'; toast.style.opacity='1'; },300);
+    },3000);
+}
+
+function completePayment() {
+    const cardName = document.getElementById('cardName').value;
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expiryDate = document.getElementById('expiryDate').value;
+    const cvv = document.getElementById('cvv').value;
+
+    if(!cardName || !cardNumber || !expiryDate || !cvv){
+        showToast("Please fill all payment details!");
+        return;
+    }
+
+    // Simple validation for card length (just for UI check)
+    if(cardNumber.length < 13) {
+        showToast("Please enter a valid card number");
+        return;
+    }
+
+    fetch("/complete_payment", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({cardName, cardNumber, expiryDate, cvv})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.message.includes("successful")){
+            showToast(data.message);
+            // Redirect to receipt provided by backend
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 1000);
+        } else {
+            showToast(data.message);
+        }
+    })
+    .catch(err => {
+        showToast("Error processing payment. Please try again.");
+    });
+}
+
+// Auto-format Card Number
+document.getElementById('cardNumber').addEventListener('input', function (e) {
+    e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+});
+
+// Auto-format Expiry
+document.getElementById('expiryDate').addEventListener('input', function (e) {
+    var input = e.target.value.replace(/\D/g,'').substring(0,4);
+    if(input.length >= 2){
+        e.target.value = input.substring(0,2) + '/' + input.substring(2);
+    } else {
+        e.target.value = input;
+    }
+});
+</script>
+
+</body>
+</html>
