@@ -163,13 +163,70 @@
     .stock-tag.low { color:var(--accent); }
     .stock-tag.out { color:var(--danger); }
 
-    .add-btn {
-        margin-top:auto; width:100%; padding:12px; border:none; border-radius:10px;
-        background:var(--primary); color:white; font-weight:600; cursor:pointer;
-        transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
+    /* BUTTONS IN CARD */
+    .card-actions { display: flex; gap: 10px; width: 100%; margin-top: auto; }
+    
+    .view-details-btn {
+        flex: 1; padding: 12px; border: 1px solid var(--primary); 
+        border-radius: 10px; background: transparent; color: var(--primary); 
+        font-weight: 600; cursor: pointer; transition: 0.2s; 
+        font-size: 0.9rem;
     }
-    .add-btn:hover { background:var(--primary-dark); }
-    .add-btn:disabled { background:#cbd5e1; cursor:not-allowed; }
+    .view-details-btn:hover { background: var(--secondary); }
+
+    .add-btn {
+        flex: 1; padding: 12px; border: none; border-radius: 10px;
+        background: var(--primary); color: white; font-weight: 600; cursor: pointer;
+        transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        font-size: 0.9rem;
+    }
+    .add-btn:hover { background: var(--primary-dark); }
+    .add-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+    /* PRODUCT DETAILS MODAL */
+    #productModal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        z-index: 2000; align-items: center; justify-content: center;
+    }
+    
+    .product-modal-content {
+        background: #fff; width: 90%; max-width: 800px; max-height: 90vh;
+        border-radius: 20px; box-shadow: var(--shadow-lg);
+        overflow-y: auto; display: flex; flex-direction: column;
+        animation: slideUp 0.3s ease-out; position: relative;
+    }
+
+    @media(min-width: 768px) {
+        .product-modal-content { flex-direction: row; overflow: hidden; }
+    }
+
+    .modal-img-col {
+        background: var(--secondary); flex: 1; padding: 40px;
+        display: flex; align-items: center; justify-content: center;
+        min-height: 300px;
+    }
+    .modal-img-col img { width: 100%; max-width: 300px; object-fit: contain; mix-blend-mode: multiply; }
+    
+    .modal-info-col { flex: 1.2; padding: 40px; display: flex; flex-direction: column; }
+    .modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 10; }
+    .modal-cat { color: var(--primary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .modal-title { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px; line-height: 1.2; }
+    .modal-price { font-size: 2rem; color: var(--primary); font-weight: 700; margin-bottom: 20px; }
+    .modal-desc { color: var(--text-muted); line-height: 1.6; margin-bottom: 30px; font-size: 0.95rem; }
+    .modal-meta { margin-bottom: 30px; font-size: 0.9rem; color: var(--text-muted); }
+    .modal-meta div { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    
+    .modal-actions { margin-top: auto; display: flex; gap: 15px; }
+    .modal-btn-cart { 
+        flex: 2; padding: 15px; background: var(--primary); color: #fff; 
+        border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; 
+    }
+    .modal-btn-cart:hover { background: var(--primary-dark); }
+    .modal-btn-close { 
+        flex: 1; padding: 15px; background: transparent; border: 1px solid var(--border); 
+        border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); 
+    }
 
     /* TOP SELLING SECTION */
     .top-selling-section {
@@ -443,6 +500,10 @@
 
         .footer-content { grid-template-columns: repeat(2, 1fr); }
         .bottom-deals-grid { grid-template-columns: 1fr; }
+
+        .product-modal-content { flex-direction: column; width: 95%; max-height: 95vh; }
+        .modal-img-col { min-height: 200px; padding: 20px; }
+        .modal-info-col { padding: 25px; }
     }
 
     /* Mobile Styles (Phones) */
@@ -502,7 +563,8 @@
         .medicine-card h3 { font-size: 0.9rem; line-height: 1.2; margin-bottom: 2px; }
         .medicine-card .price { font-size: 1rem; margin-bottom: 8px; }
         .stock-tag { font-size: 0.7rem; margin-bottom: 8px; }
-        .add-btn { padding: 8px; font-size: 0.8rem; }
+        .card-actions { flex-direction: column; }
+        .add-btn, .view-details-btn { padding: 8px; font-size: 0.8rem; }
         .card-cat-badge, .offer-ribbon, .card-wishlist-btn { transform: scale(0.8); }
         .card-cat-badge { top: 10px; left: 10px; }
         .card-wishlist-btn { top: 10px; right: 10px; }
@@ -629,13 +691,17 @@
                     <p class="stock-tag out">Out of Stock</p>
                 {% endif %}
 
-                {% if med.quantity > 0 %}
-                <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">
-                    <span>Add to Cart</span> <span>+</span>
-                </button>
-                {% else %}
-                <button class="add-btn" disabled>Unavailable</button>
-                {% endif %}
+                <div class="card-actions">
+                    <button class="view-details-btn" onclick="openProductModal('{{ med._id }}')">View Details</button>
+                    
+                    {% if med.quantity > 0 %}
+                    <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">
+                        <span>Add</span>
+                    </button>
+                    {% else %}
+                    <button class="add-btn" disabled>Out</button>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -662,12 +728,15 @@
                 <p class="price">${{ med.price }}</p>
                 <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">{{ med.sold }} Sold</p>
                 
-                {% if med.quantity > 0 %}
-                <!-- FIXED: Added 'this' argument to fix button crash -->
-                <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">Add to Cart</button>
-                {% else %}
-                <button class="add-btn" disabled>Out of Stock</button>
-                {% endif %}
+                <div class="card-actions">
+                    <button class="view-details-btn" onclick="openProductModal('{{ med._id }}')">View Details</button>
+                    {% if med.quantity > 0 %}
+                    <!-- FIXED: Added 'this' argument to fix button crash -->
+                    <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">Add</button>
+                    {% else %}
+                    <button class="add-btn" disabled>Out</button>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -864,7 +933,7 @@
                 <span>+1 (555) 123-4567</span>
             </div>
             <div class="contact-info-item">
-                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5 2.5 2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5 2.5 2.5 1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5z"/></svg>
                 <span>123 Health Ave, NY</span>
             </div>
         </div>
@@ -896,6 +965,39 @@
     </div>
 </div>
 
+<!-- PRODUCT DETAILS MODAL -->
+<div id="productModal">
+    <div class="product-modal-content">
+        <span class="modal-close" onclick="closeProductModal()">×</span>
+        <div class="modal-img-col">
+            <img id="pModalImage" src="" alt="Product">
+        </div>
+        <div class="modal-info-col">
+            <div class="modal-cat" id="pModalCategory">Category</div>
+            <h2 class="modal-title" id="pModalName">Product Name</h2>
+            <div class="modal-price" id="pModalPrice">$0.00</div>
+            <p class="modal-desc" id="pModalDesc">
+                <!-- Description loads here -->
+            </p>
+            <div class="modal-meta">
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span id="pModalStock">In Stock</span>
+                </div>
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    <span>Authentic Product</span>
+                </div>
+            </div>
+            <input type="hidden" id="pModalId">
+            <div class="modal-actions">
+                <button class="modal-btn-close" onclick="closeProductModal()">Close</button>
+                <button class="modal-btn-cart" id="pModalAddBtn" onclick="addToCartFromModal()">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast Notification -->
 <div id="toast"></div>
 
@@ -908,6 +1010,69 @@ function openProfileModal() { document.getElementById('profileModal').style.disp
 function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
 function openContactModal() { document.getElementById('contactModal').style.display = 'flex'; }
 function closeContactModal() { document.getElementById('contactModal').style.display = 'none'; }
+
+// --- PRODUCT DETAILS MODAL LOGIC ---
+function openProductModal(id) {
+    fetch(`/api/medicine/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) {
+                showToast("Error loading product details");
+                return;
+            }
+            document.getElementById('pModalId').value = data._id;
+            document.getElementById('pModalName').textContent = data.name;
+            document.getElementById('pModalCategory').textContent = data.category;
+            document.getElementById('pModalPrice').textContent = `$${data.price}`;
+            document.getElementById('pModalImage').src = data.image || `https://picsum.photos/seed/${data.name}/400/400.jpg`;
+            
+            // --- UPDATED: Handle Description ---
+            const descEl = document.getElementById('pModalDesc');
+            if(data.description && data.description.trim() !== "") {
+                descEl.textContent = data.description;
+                descEl.style.display = 'block';
+            } else {
+                descEl.textContent = "No detailed description available for this product. Please contact support for more info.";
+                descEl.style.display = 'block'; // Ensure it's visible
+            }
+
+            const stockEl = document.getElementById('pModalStock');
+            const addBtn = document.getElementById('pModalAddBtn');
+            
+            if(data.quantity > 10) {
+                stockEl.textContent = "In Stock";
+                stockEl.style.color = "var(--text-muted)";
+                addBtn.disabled = false;
+                addBtn.textContent = "Add to Cart";
+            } else if (data.quantity > 0) {
+                stockEl.textContent = `Only ${data.quantity} left`;
+                stockEl.style.color = "var(--accent)";
+                addBtn.disabled = false;
+                addBtn.textContent = "Add to Cart";
+            } else {
+                stockEl.textContent = "Out of Stock";
+                stockEl.style.color = "var(--danger)";
+                addBtn.disabled = true;
+                addBtn.textContent = "Unavailable";
+            }
+
+            document.getElementById('productModal').style.display = 'flex';
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Network error");
+        });
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+function addToCartFromModal() {
+    const id = document.getElementById('pModalId').value;
+    const btn = document.getElementById('pModalAddBtn');
+    addToCart(id, btn);
+}
 
 function showToast(message){
     const toast = document.getElementById('toast');
@@ -1148,10 +1313,14 @@ function applyFilters(){
 window.onclick = function(event) {
     const modal = document.getElementById('profileModal');
     const contactModal = document.getElementById('contactModal');
+    const productModal = document.getElementById('productModal');
     const sideNav = document.getElementById('sideNav');
     const hamburger = document.querySelector('.hamburger');
+    
     if (event.target == modal) closeProfileModal();
     if (event.target == contactModal) closeContactModal();
+    if (event.target == productModal) closeProductModal();
+    
     if (sideNav.classList.contains('open') && !sideNav.contains(event.target) && !hamburger.contains(event.target)) {
         sideNav.classList.remove('open');
     }

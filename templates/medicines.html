@@ -5,8 +5,7 @@
 <title>All Medicines - PharmaCare</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    :root {
+<style>    :root {
         --primary: #0f766e;
         --primary-light: #14b8a6;
         --primary-dark: #0d5e56;
@@ -64,11 +63,11 @@
         text-align: center;
         padding: 3rem 1rem 1rem 1rem;
     }
-    .page-header h2 { font-size: 2.5rem; color: var(--primary-dark); font-weight: 800; }
-    .page-header p { color: var(--text-muted); margin-top: 0.5rem; }
+    .page-header h2 { font-size: 2.5rem; color: var(--primary-dark); font-weight: 800; margin-bottom: 0.5rem; }
+    .page-header p { color: var(--text-muted); margin-top: 0.5rem; font-size: 1.1rem; }
 
     /* Container */
-    .container { max-width:1300px; margin:0 auto; padding:20px; width: 100%; }
+    .container { max-width:1300px; margin:0 auto; padding:20px; }
 
     /* Filter Bar */
     .filters-container {
@@ -78,7 +77,7 @@
         box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
     }
     .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .filter-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 5px; }
+    .filter-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 5px; white-space: nowrap; }
     
     .filter-btn { 
         padding: 8px 16px; border:1px solid #e2e8f0; border-radius:20px; 
@@ -89,7 +88,7 @@
     .filter-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); box-shadow:0 2px 5px rgba(15, 118, 110, 0.3); }
 
     /* Grid */
-    .medicine-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:30px; }
+    .medicine-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:30px; margin-top:10px; }
 
     /* Medicine Card */
     .medicine-card { 
@@ -147,13 +146,70 @@
     .stock-tag.low { color:var(--accent); }
     .stock-tag.out { color:var(--danger); }
 
-    .add-btn {
-        margin-top:auto; width:100%; padding:12px; border:none; border-radius:10px;
-        background:var(--primary); color:white; font-weight:600; cursor:pointer;
-        transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
+    /* BUTTONS IN CARD */
+    .card-actions { display: flex; gap: 10px; width: 100%; margin-top: auto; }
+    
+    .view-details-btn {
+        flex: 1; padding: 12px; border: 1px solid var(--primary); 
+        border-radius: 10px; background: transparent; color: var(--primary); 
+        font-weight: 600; cursor: pointer; transition: 0.2s; 
+        font-size: 0.9rem;
     }
-    .add-btn:hover { background:var(--primary-dark); }
-    .add-btn:disabled { background:#cbd5e1; cursor:not-allowed; }
+    .view-details-btn:hover { background: var(--secondary); }
+
+    .add-btn {
+        flex: 1; padding: 12px; border: none; border-radius: 10px;
+        background: var(--primary); color: white; font-weight: 600; cursor: pointer;
+        transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        font-size: 0.9rem;
+    }
+    .add-btn:hover { background: var(--primary-dark); }
+    .add-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+    /* PRODUCT DETAILS MODAL (NEW) */
+    #productModal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        z-index: 2000; align-items: center; justify-content: center;
+    }
+    
+    .product-modal-content {
+        background: #fff; width: 90%; max-width: 800px; max-height: 90vh;
+        border-radius: 20px; box-shadow: var(--shadow-lg);
+        overflow-y: auto; display: flex; flex-direction: column;
+        animation: slideUp 0.3s ease-out; position: relative;
+    }
+
+    @media(min-width: 768px) {
+        .product-modal-content { flex-direction: row; overflow: hidden; }
+    }
+
+    .modal-img-col {
+        background: var(--secondary); flex: 1; padding: 40px;
+        display: flex; align-items: center; justify-content: center;
+        min-height: 300px;
+    }
+    .modal-img-col img { width: 100%; max-width: 300px; object-fit: contain; mix-blend-mode: multiply; }
+    
+    .modal-info-col { flex: 1.2; padding: 40px; display: flex; flex-direction: column; }
+    .modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 10; }
+    .modal-cat { color: var(--primary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .modal-title { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px; line-height: 1.2; }
+    .modal-price { font-size: 2rem; color: var(--primary); font-weight: 700; margin-bottom: 20px; }
+    .modal-desc { color: var(--text-muted); line-height: 1.6; margin-bottom: 30px; font-size: 0.95rem; }
+    .modal-meta { margin-bottom: 30px; font-size: 0.9rem; color: var(--text-muted); }
+    .modal-meta div { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    
+    .modal-actions { margin-top: auto; display: flex; gap: 15px; }
+    .modal-btn-cart { 
+        flex: 2; padding: 15px; background: var(--primary); color: #fff; 
+        border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; 
+    }
+    .modal-btn-cart:hover { background: var(--primary-dark); }
+    .modal-btn-close { 
+        flex: 1; padding: 15px; background: transparent; border: 1px solid var(--border); 
+        border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); 
+    }
 
     /* FOOTER */
     footer {
@@ -194,18 +250,21 @@
     .menu-link:hover { background:var(--secondary); color:var(--primary-dark); }
     .close-nav { position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer; color:var(--text-muted); }
 
-    /* MODALS */
+    /* MODALS CONTAINER */
     #profileModal, #contactModal { 
         display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
         background:rgba(15, 118, 110, 0.4); backdrop-filter:blur(5px);
         z-index:400; justify-content:center; align-items:center; 
     }
+    
+    /* PROFILE MODAL */
     .modal { 
         background:#fff; padding:35px; border-radius:20px; width:100%; max-width:450px; 
         box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out;
         position: relative;
     }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
     .modal h2 { margin-bottom:25px; color:var(--primary); text-align:center; }
     .form-group { margin-bottom:15px; }
     .form-group label { display:block; font-size:0.9rem; font-weight:600; margin-bottom:5px; color:var(--text-muted); }
@@ -218,6 +277,7 @@
     .modal-btn:hover { background:var(--primary-dark); }
     .close-modal { position:absolute; top:20px; right:20px; cursor:pointer; font-size:20px; color:var(--text-muted); }
 
+    /* ENHANCED CONTACT MODAL */
     .contact-modal-enhanced {
         max-width: 800px; width: 90%; padding: 0; overflow: hidden;
         display: flex; flex-direction: row; border-radius: 20px; background: white;
@@ -284,14 +344,88 @@
     }
     @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
-    @media(max-width:900px){
-        nav { flex-wrap:wrap; padding:1rem; }
-        .nav-center { order:3; width:100%; margin:10px 0 0 0; }
-        .nav-actions { gap:15px; }
-        .hamburger { display:block; margin-left:auto; }
-        .sidebar-drawer { width:100%; right:-100%; }
-        .contact-modal-enhanced { flex-direction: column; width: 95%; max-height: 90vh; overflow-y: auto; }
-        .contact-left, .contact-right { width: 100%; }
+    /* Responsive Styles */
+    @media(max-width: 900px) {
+        nav { flex-wrap: wrap; padding: 1rem; }
+        .nav-center { order: 3; width: 100%; margin: 10px 0 0 0; }
+        .nav-actions { gap: 15px; }
+        .hamburger { margin-left: auto; }
+        .sidebar-drawer { width: 100%; right: -100%; }
+        
+        .contact-modal-enhanced { flex-direction: column; width: 95%; max-height: 90vh; overflow-y: auto; border-radius: 15px; }
+        .contact-left, .contact-right { width: 100%; padding: 25px; }
+        .contact-left { padding: 30px 25px; }
+        .contact-right { padding: 25px; }
+
+        .footer-content { grid-template-columns: repeat(2, 1fr); }
+        
+        .product-modal-content { flex-direction: column; width: 95%; max-height: 95vh; }
+        .modal-img-col { min-height: 200px; padding: 20px; }
+        .modal-info-col { padding: 25px; }
+    }
+
+    /* Mobile Styles (Phones) */
+    @media(max-width: 600px) {
+        /* Navbar */
+        nav { padding: 0.8rem 1rem; align-items: center; }
+        .nav-actions { margin-left: auto; order: 1; }
+        .nav-center { order: 2; width: 100%; margin: 10px 0 0 0; }
+        nav input { padding: 10px 15px; font-size: 14px; }
+        
+        /* Hero is not on medicines page, but keeping styles consistent */
+        
+        /* Filters */
+        .filters-container {
+            position: relative; /* Non-sticky on mobile */
+            top: 0;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 10px;
+            gap: 15px;
+            border-radius: 0;
+            margin-left: -20px; margin-right: -20px; width: calc(100% + 40px);
+            border-left: none; border-right: none;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .filter-label { margin-bottom: 5px; display: block; }
+        .filter-group {
+            display: flex;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 5px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            width: 100%;
+        }
+        .filter-group::-webkit-scrollbar { display: none; }
+        .filter-btn { font-size: 0.8rem; padding: 6px 12px; flex-shrink: 0; }
+
+        /* Grid */
+        .medicine-grid { 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
+        }
+        
+        /* Product Card */
+        .medicine-card { padding: 12px; }
+        .img-wrapper { width: 70px; height: 70px; margin: 10px 0; }
+        .medicine-card img { width: 50px; height: 50px; }
+        .medicine-card h3 { font-size: 0.9rem; line-height: 1.2; margin-bottom: 2px; }
+        .medicine-card .price { font-size: 1rem; margin-bottom: 8px; }
+        .stock-tag { font-size: 0.7rem; margin-bottom: 8px; }
+        .card-actions { flex-direction: column; }
+        .add-btn, .view-details-btn { padding: 8px; font-size: 0.8rem; }
+        .card-cat-badge, .offer-ribbon, .card-wishlist-btn { transform: scale(0.8); }
+        .card-cat-badge { top: 10px; left: 10px; }
+        .card-wishlist-btn { top: 10px; right: 10px; }
+        
+        /* Modals */
+        .modal { width: 95%; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        
+        /* Footer */
+        .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
+        .footer-section { text-align: center; }
     }
 </style>
 </head>
@@ -310,12 +444,14 @@
 
     <div class="nav-actions">
         <button class="nav-btn hamburger" onclick="toggleSideNav()">☰</button>
+        
         <button class="nav-btn" onclick="toggleWishlistSidebar()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
             <span class="wishlist-badge" id="wishlistCount">{{ wishlist|length }}</span>
         </button>
+        
         <button class="nav-btn" onclick="toggleCart()">
             🛒 <span class="cart-badge" id="cartCount">{{ cart|length }}</span>
         </button>
@@ -352,7 +488,7 @@
     <!-- Main Medicines Grid -->
     <div class="medicine-grid" id="medicineGrid">
         {% for med in medicines %}
-        <div class="medicine-card" data-category="{{ med.category }}" data-price="{{ med.price }}">
+        <div class="medicine-card" data-category="{{ med.category }}" data-price="{{ med.price }}" data-id="{{ med._id }}">
             
             {% for deal in deals %}
                 {% if deal.category == med.category or deal.category == 'All' %}
@@ -360,7 +496,7 @@
                 {% endif %}
             {% endfor %}
 
-            <button class="card-wishlist-btn {% for item in wishlist %}{% if item.id == med._id %}active{% endif %}{% endfor %}" 
+            <button class="card-wishlist-btn {% for item in wishlist %}{% if item.id == med._id|string %}active{% endif %}{% endfor %}" 
                     onclick="toggleWishlist('{{ med._id }}', this)">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             </button>
@@ -380,13 +516,17 @@
                 <p class="stock-tag out">Out of Stock</p>
             {% endif %}
 
-            {% if med.quantity > 0 %}
-            <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">
-                <span>Add to Cart</span> <span>+</span>
-            </button>
-            {% else %}
-            <button class="add-btn" disabled>Unavailable</button>
-            {% endif %}
+            <!-- Updated Actions -->
+            <div class="card-actions">
+                <button class="view-details-btn" onclick="openProductModal('{{ med._id }}')">View Details</button>
+                {% if med.quantity > 0 %}
+                <button class="add-btn" onclick="addToCart('{{ med._id }}', this)">
+                    <span>Add</span> <span>+</span>
+                </button>
+                {% else %}
+                <button class="add-btn" disabled>Unavailable</button>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -521,13 +661,13 @@
                 <span>+1 (555) 123-4567</span>
             </div>
             <div class="contact-info-item">
-                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-2.5 2.5 1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5-1.12 2.5-2.5z"/></svg>
                 <span>123 Health Ave, NY</span>
             </div>
         </div>
         <div class="contact-right">
             <h2>Contact Us</h2>
-            <span class="subtitle">Fill out the form and we'll get back to you.</span>
+            <span class="subtitle">Fill out form and we'll get back to you.</span>
             <div class="form-group">
                 <label>Full Name</label>
                 <input type="text" id="contactName" value="{{ user.name }}">
@@ -553,6 +693,39 @@
     </div>
 </div>
 
+<!-- PRODUCT DETAILS MODAL -->
+<div id="productModal">
+    <div class="product-modal-content">
+        <span class="modal-close" onclick="closeProductModal()">×</span>
+        <div class="modal-img-col">
+            <img id="pModalImage" src="" alt="Product">
+        </div>
+        <div class="modal-info-col">
+            <div class="modal-cat" id="pModalCategory">Category</div>
+            <h2 class="modal-title" id="pModalName">Product Name</h2>
+            <div class="modal-price" id="pModalPrice">$0.00</div>
+            <p class="modal-desc" id="pModalDesc">
+                <!-- Description loads here -->
+            </p>
+            <div class="modal-meta">
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span id="pModalStock">In Stock</span>
+                </div>
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    <span>Authentic Product</span>
+                </div>
+            </div>
+            <input type="hidden" id="pModalId">
+            <div class="modal-actions">
+                <button class="modal-btn-close" onclick="closeProductModal()">Close</button>
+                <button class="modal-btn-cart" id="pModalAddBtn" onclick="addToCartFromModal()">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast Notification -->
 <div id="toast"></div>
 
@@ -566,11 +739,74 @@ function closeProfileModal() { document.getElementById('profileModal').style.dis
 function openContactModal() { document.getElementById('contactModal').style.display = 'flex'; }
 function closeContactModal() { document.getElementById('contactModal').style.display = 'none'; }
 
+// --- PRODUCT DETAILS MODAL LOGIC ---
+function openProductModal(id) {
+    fetch(`/api/medicine/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) {
+                showToast("Error loading product details");
+                return;
+            }
+            document.getElementById('pModalId').value = data._id;
+            document.getElementById('pModalName').textContent = data.name;
+            document.getElementById('pModalCategory').textContent = data.category;
+            document.getElementById('pModalPrice').textContent = `$${data.price}`;
+            document.getElementById('pModalImage').src = data.image || `https://picsum.photos/seed/${data.name}/400/400.jpg`;
+            
+            // --- UPDATED: Handle Description ---
+            const descEl = document.getElementById('pModalDesc');
+            if(data.description && data.description.trim() !== "") {
+                descEl.textContent = data.description;
+                descEl.style.display = 'block';
+            } else {
+                descEl.textContent = "No description available.";
+                descEl.style.display = 'block';
+            }
+
+            const stockEl = document.getElementById('pModalStock');
+            const addBtn = document.getElementById('pModalAddBtn');
+            
+            if(data.quantity > 10) {
+                stockEl.textContent = "In Stock";
+                stockEl.style.color = "var(--text-muted)";
+                addBtn.disabled = false;
+                addBtn.textContent = "Add to Cart";
+            } else if (data.quantity > 0) {
+                stockEl.textContent = `Only ${data.quantity} left`;
+                stockEl.style.color = "var(--accent)";
+                addBtn.disabled = false;
+                addBtn.textContent = "Add to Cart";
+            } else {
+                stockEl.textContent = "Out of Stock";
+                stockEl.style.color = "var(--danger)";
+                addBtn.disabled = true;
+                addBtn.textContent = "Unavailable";
+            }
+
+            document.getElementById('productModal').style.display = 'flex';
+        })
+        .catch(err => {
+            console.error(err);
+            showToast("Network error");
+        });
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+function addToCartFromModal() {
+    const id = document.getElementById('pModalId').value;
+    const btn = document.getElementById('pModalAddBtn');
+    addToCart(id, btn);
+}
+
 function showToast(message){
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.style.display = 'block';
-    setTimeout(()=>{ toast.style.opacity = '0'; setTimeout(()=>{ toast.style.display='none'; toast.style.opacity='1'; },300); },3000);
+    setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>{ toast.style.display='none'; toast.style.opacity='1'; },300); },3000);
 }
 
 function updateProfile() {
@@ -666,7 +902,7 @@ function moveToCart(med_id) {
 }
 
 function addToCartDirect(med_id) {
-    fetch("/user/add_to_cart", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+    fetch("/user/add_to_cart", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({med_id}) })
     .then(res => res.json()).then(data => {
         if(data.cart){ updateCartUI(data.cart); showToast("Added to cart!"); removeFromWishlist(med_id); }
         else showToast(data.message);
@@ -688,6 +924,15 @@ function moveAllToCart() {
 // ---------------- CART LOGIC ----------------
 function addToCart(med_id, btn){
     const originalContent = btn.innerHTML;
+    // Safety check for btn
+    if(!btn) {
+        fetch("/user/add_to_cart", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
+        .then(res => res.json()).then(data => {
+            if(data.cart){ updateCartUI(data.cart); showToast("Added to cart!"); }
+        });
+        return;
+    }
+
     btn.innerHTML = "Adding..."; btn.disabled = true;
     fetch("/user/add_to_cart", { method: "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({med_id}) })
     .then(res => res.json()).then(data => {
@@ -736,42 +981,71 @@ function updateCartUI(cartData){
 }
 
 // ---------------- FILTER LOGIC ----------------
-document.getElementById('searchInput').addEventListener('input', filterAll);
+// Global state for filters
+let currentCategory = 'All';
+let currentPrice = 'Any';
+
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    // Search applies to ALL grids (Main Grid + Top Selling)
+    document.querySelectorAll('.medicine-card').forEach(card => {
+        const name = card.querySelector('h3').innerText.toLowerCase();
+        const category = card.getAttribute('data-category');
+        if(name.includes(term) || category.includes(term)) { card.style.display = 'flex'; } else { card.style.display = 'none'; }
+    });
+});
+
 function filterCategory(category, event){ 
+    currentCategory = category;
     document.querySelectorAll('.filters-container .filter-btn').forEach(btn => { if(btn.textContent.includes('$')) return; btn.classList.remove('active'); });
-    event.target.classList.add('active'); filterAll();
+    event.target.classList.add('active'); 
+    applyFilters();
 }
+
 function filterPrice(priceRange, event){
+    currentPrice = priceRange;
     document.querySelectorAll('.filters-container .filter-btn').forEach(btn => { if(!btn.textContent.includes('$')) return; btn.classList.remove('active'); });
-    event.target.classList.add('active'); filterAll();
+    event.target.classList.add('active'); 
+    applyFilters();
 }
-function filterAll(){
+
+function applyFilters(){
     const searchText = document.getElementById('searchInput').value.toLowerCase();
-    const activeCatBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.classList.contains('active') && !b.innerText.includes('$'));
-    const activeCategory = activeCatBtn ? activeCatBtn.innerText : 'All';
-    const activePriceBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.classList.contains('active') && b.innerText.includes('$'));
-    const activePriceText = activePriceBtn ? activePriceBtn.innerText : 'Any';
-    document.querySelectorAll('.medicine-card').forEach(card=>{
+    
+    // NOTE: Category and Price filters ONLY apply to the Main Grid (#medicineGrid)
+    const mainGridCards = document.querySelectorAll('#medicineGrid .medicine-card');
+    
+    mainGridCards.forEach(card=>{
         const name = card.querySelector('h3').innerText.toLowerCase();
         const category = card.getAttribute('data-category');
         const price = parseFloat(card.getAttribute('data-price'));
-        let matchCat = activeCategory==='All' || category===activeCategory;
+        
+        let matchCat = currentCategory==='All' || category===currentCategory;
         let matchPrice = true;
-        if(activePriceText.includes('< $10')){ matchPrice = price<10; }
-        else if(activePriceText.includes('$10 - $50')){ matchPrice = price>=10 && price<=50; }
-        else if(activePriceText.includes('> $50')){ matchPrice = price>50; }
-        const isVisible = name.includes(searchText) && matchCat && matchPrice;
+        if(currentPrice === 'under10'){ matchPrice = price<10; }
+        else if(currentPrice === '10to50'){ matchPrice = price>=10 && price<=50; }
+        else if(currentPrice === 'above50'){ matchPrice = price>50; }
+        
+        // Always check search text
+        const matchSearch = name.includes(searchText) || category.includes(searchText);
+
+        const isVisible = matchSearch && matchCat && matchPrice;
         card.style.display = isVisible ? 'flex' : 'none';
     });
 }
 
+// Window Click Handler
 window.onclick = function(event) {
     const modal = document.getElementById('profileModal');
     const contactModal = document.getElementById('contactModal');
+    const productModal = document.getElementById('productModal');
     const sideNav = document.getElementById('sideNav');
     const hamburger = document.querySelector('.hamburger');
+    
     if (event.target == modal) closeProfileModal();
     if (event.target == contactModal) closeContactModal();
+    if (event.target == productModal) closeProductModal();
+    
     if (sideNav.classList.contains('open') && !sideNav.contains(event.target) && !hamburger.contains(event.target)) {
         sideNav.classList.remove('open');
     }

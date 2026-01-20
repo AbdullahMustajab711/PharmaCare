@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for # pyright: ignore[reportMissingImports]
-from pymongo import MongoClient # pyright: ignore[reportMissingImports]
-from bson.objectid import ObjectId # pyright: ignore[reportMissingImports]
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 from datetime import datetime, timedelta
-import bcrypt # pyright: ignore[reportMissingImports]
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = "my_super_secret_key_1234567890"
@@ -18,7 +18,7 @@ orders = db["orders"]
 carousel = db["carousel"]
 deals = db["deals"]
 messages = db["messages"]
-brands = db["brands"] 
+brands = db["brands"]
 
 # ----------------- CREATE DEFAULT ADMIN -----------------
 if not admins.find_one({"email": "admin@example.com"}):
@@ -32,9 +32,48 @@ if not admins.find_one({"email": "admin@example.com"}):
 # ----------------- PUBLIC LANDING PAGE -----------------
 @app.route("/")
 def landing_page():
+    # Fetch data needed for the landing page
     all_medicines = list(medicines.find())
     all_deals = list(deals.find())
-    return render_template("landing_page.html", medicines=all_medicines, deals=all_deals)
+    
+    # Fetch Top Selling (Sort by sold)
+    top_medicines = list(medicines.find().sort("sold", -1).limit(8))
+    for m in top_medicines:
+        m['_id'] = str(m['_id'])
+
+    # Fetch Banners
+    carousel_banners = list(carousel.find())
+    for b in carousel_banners:
+        b['_id'] = str(b['_id'])
+
+    # Fetch Brands
+    all_brands = list(brands.find())
+    for brand in all_brands:
+        brand['_id'] = str(brand['_id'])
+
+    # Convert IDs to string for template compatibility
+    for med in all_medicines:
+        med['_id'] = str(med['_id'])
+
+    return render_template("landing_page.html", 
+                         medicines=all_medicines, 
+                         deals=all_deals, 
+                         top_medicines=top_medicines,
+                         carousel_banners=carousel_banners,
+                         brands=all_brands)
+
+# ------------------- API: MEDICINE DETAILS (Allows guests to view details on landing page) -----------------
+@app.route("/api/medicine/<id>")
+def get_medicine_details_api(id):
+    # Allows guests to view details via modal on landing page
+    try:
+        med = medicines.find_one({"_id": ObjectId(id)})
+        if med:
+            med['_id'] = str(med['_id'])
+            return jsonify(med)
+        return jsonify({"error": "Medicine not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ------------------- REGISTER -------------------
 @app.route("/register")
@@ -55,6 +94,7 @@ def register():
         "role": "user"
     })
     return jsonify({"message": "Registered successfully"})
+
 
 # ------------------- LOGIN -------------------
 @app.route("/login")
@@ -133,7 +173,7 @@ def user_home():
                          wishlist=session.get('wishlist', []),
                          deals=all_deals)
 
-# ------------------- MEDICINES PAGE -------------------
+# ------------------- ALL MEDICINES PAGE -------------------
 @app.route("/medicines")
 def medicines_page():
     if 'user' not in session:
@@ -344,7 +384,7 @@ def delete_banner():
         carousel.delete_one({"_id": ObjectId(data['id'])})
         return jsonify({"message":"Banner deleted successfully"})
     except Exception as e:
-        return jsonify({"message": f"Error: {str(e)}"}, 500)
+        return jsonify({"message": f"Error: {str(e)}"}), 500
 
 @app.route("/admin/add_deal", methods=["POST"])
 def add_deal():
@@ -369,7 +409,7 @@ def delete_deal():
         deals.delete_one({"_id": ObjectId(data['id'])})
         return jsonify({"message":"Deal deleted successfully"})
     except Exception as e:
-        return jsonify({"message": f"Error: {str(e)}"}, 500)
+        return jsonify({"message": f"Error: {str(e)}"}), 500
 
 @app.route("/admin/add_medicine", methods=["POST"])
 def add_medicine():
@@ -383,6 +423,7 @@ def add_medicine():
             "price": float(data['price']),
             "quantity": int(data['quantity']),
             "sold": 0,
+            "description": data.get('description', "No description available."), # UPDATED: Handles description
             "image": data.get('image', "/static/images/default.png")
         })
         return jsonify({"message":"Medicine added successfully"})
@@ -409,6 +450,7 @@ def edit_medicine():
             "category": data.get('category', "General"),
             "price": float(data['price']),
             "quantity": int(data['quantity']),
+            "description": data.get('description', "No description available."), # UPDATED
             "image": data.get('image', "/static/images/default.png")
         }}
     )
@@ -437,7 +479,7 @@ def delete_brand():
         brands.delete_one({"_id": ObjectId(data['id'])})
         return jsonify({"message":"Brand deleted successfully"})
     except Exception as e:
-        return jsonify({"message": f"Error: {str(e)}"}, 500)
+        return jsonify({"message": f"Error: {str(e)}"}), 500
 
 @app.route("/checkout")
 def checkout():

@@ -201,11 +201,11 @@
     /* Forms */
     .form-group { margin-bottom:15px; }
     .form-group label { display:block; font-size:0.85rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; }
-    .form-group input, .form-group select { 
+    .form-group input, .form-group select, .form-group textarea { 
         width:100%; padding:10px 15px; border:1px solid var(--border); 
         border-radius:8px; outline:none; transition:0.2s; font-size:14px; background:#f8fafc; 
     }
-    .form-group input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 2px rgba(15,118,110,0.1); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 2px rgba(15,118,110,0.1); }
     
     .btn-primary { 
         width:100%; padding:12px; background:var(--primary); color:#fff; 
@@ -243,6 +243,9 @@
 
     .actions { display:flex; gap:8px; }
     .btn-sm { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500; }
+    
+    .btn-view { background:#eff6ff; color:#0284c7; }
+    .btn-view:hover { background:#dbeafe; }
     .btn-edit { background:#eff6ff; color:#2563eb; }
     .btn-delete { background:#fef2f2; color:#dc2626; }
 
@@ -289,6 +292,59 @@
 
     @keyframes slideIn { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
 
+    /* ---------------- ADMIN PRODUCT DETAILS MODAL ---------------- */
+    #adminProductModal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        z-index: 3000; align-items: center; justify-content: center;
+    }
+
+    .admin-modal-content {
+        background: #fff; width: 90%; max-width: 800px;
+        border-radius: 20px; box-shadow: var(--shadow-lg);
+        overflow: hidden; display: flex; flex-direction: column;
+        animation: slideIn 0.3s ease-out; position: relative;
+    }
+
+    @media(min-width: 768px) {
+        .admin-modal-content { flex-direction: row; height: 500px; overflow: hidden; }
+    }
+
+    .admin-modal-img-col {
+        background: var(--secondary); flex: 1; padding: 40px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .admin-modal-img-col img { width: 100%; max-width: 350px; object-fit: contain; mix-blend-mode: multiply; }
+    
+    .admin-modal-info-col { flex: 1.2; padding: 40px; display: flex; flex-direction: column; overflow-y: auto; }
+    .admin-close-modal { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 10; }
+    
+    .admin-cat-tag { color: var(--primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .admin-title { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px; line-height: 1.2; }
+    .admin-price { font-size: 1.8rem; color: var(--primary); font-weight: 700; margin-bottom: 20px; }
+    
+    .admin-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+    .admin-stat-box { background: #f8fafc; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .admin-stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .admin-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+
+    .admin-modal-desc {
+        color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;
+        margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;
+    }
+
+    .admin-modal-actions { margin-top: auto; display: flex; gap: 15px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    .admin-btn-edit { 
+        flex: 1; padding: 12px; background: var(--primary); color: #fff; 
+        border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; 
+    }
+    .admin-btn-edit:hover { background: var(--primary-dark); }
+    .admin-btn-delete { 
+        flex: 1; padding: 12px; background: #fff; border: 1px solid var(--danger); color: var(--danger); 
+        border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; 
+    }
+    .admin-btn-delete:hover { background: var(--danger); color: #fff; }
+
     /* Responsive */
     @media(max-width: 1100px) { 
         .content-split { grid-template-columns: 1fr; } 
@@ -307,6 +363,10 @@
         #vipModal .modal-content { width: 95%; }
         .search-input { width: 100%; margin-top: 10px; }
         .panel-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        
+        .admin-modal-content { flex-direction: column; height: auto; max-height: 90vh; overflow-y: auto; }
+        .admin-modal-img-col { min-height: 200px; padding: 20px; }
+        .admin-modal-info-col { padding: 20px; }
     }
 </style>
 </head>
@@ -459,6 +519,7 @@
             <div class="form-group"><label>Price ($)</label><input type="number" id="medPrice" step="0.01"></div>
             <div class="form-group"><label>Quantity</label><input type="number" id="medQuantity"></div>
             <div class="form-group"><label>Image URL</label><input type="text" id="medImage" placeholder="Optional"></div>
+            <div class="form-group"><label>Description</label><textarea id="medDescription" rows="3" placeholder="Enter product details..."></textarea></div>
             <button class="btn-primary" onclick="addMedicine()">Add Product</button>
         </div>
         <div class="panel">
@@ -471,7 +532,7 @@
                     <thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
                     <tbody id="medicineTable">
                         {% for med in medicines %}
-                        <tr data-id="{{ med._id }}" data-name="{{ med.name|e }}" data-price="{{ med.price }}" data-quantity="{{ med.quantity }}" data-category="{{ med.category|e }}" data-image="{{ med.image|default('/static/images/default.png')|e }}">
+                        <tr data-id="{{ med._id }}" data-name="{{ med.name|e }}" data-price="{{ med.price }}" data-quantity="{{ med.quantity }}" data-category="{{ med.category|e }}" data-image="{{ med.image|default('/static/images/default.png')|e }}" data-description="{{ med.description|e }}">
                             <td><img src="{{ med.image|default('/static/images/default.png') }}" class="med-img"></td>
                             <td>{{ med.name }}</td>
                             <td>{{ med.category }}</td>
@@ -487,6 +548,7 @@
                             </td>
                             <td>
                                 <div class="actions">
+                                    <button class="btn-sm btn-view" onclick="openAdminViewModal('{{ med._id }}')">View</button>
                                     <button class="btn-sm btn-edit" onclick="openEditModal(this)">Edit</button>
                                     <button class="btn-sm btn-delete" onclick="deleteMedicine('{{ med._id }}')">Del</button>
                                 </div>
@@ -568,6 +630,7 @@
         <div class="form-group"><label>Price</label><input type="number" id="editMedPrice"></div>
         <div class="form-group"><label>Quantity</label><input type="number" id="editMedQuantity"></div>
         <div class="form-group"><label>Image URL</label><input type="text" id="editMedImage"></div>
+        <div class="form-group"><label>Description</label><textarea id="editMedDescription" rows="3"></textarea></div>
         <button class="btn-primary" onclick="saveEditMedicine()">Save Changes</button>
     </div>
 </div>
@@ -598,7 +661,49 @@
     </div>
 </div>
 
+<!-- ADMIN VIEW PRODUCT MODAL -->
+<div id="adminProductModal">
+    <div class="admin-modal-content">
+        <span class="admin-close-modal" onclick="closeAdminViewModal()">×</span>
+        <div class="admin-modal-img-col">
+            <img id="aViewImage" src="" alt="Product">
+        </div>
+        <div class="admin-modal-info-col">
+            <div class="admin-cat-tag" id="aViewCategory">Category</div>
+            <h2 class="admin-title" id="aViewName">Product Name</h2>
+            <div class="admin-price" id="aViewPrice">$0.00</div>
+            
+            <!-- Description Display -->
+            <div class="admin-modal-desc" id="aViewDesc">
+                No description available.
+            </div>
+            
+            <div class="admin-stats-grid">
+                <div class="admin-stat-box">
+                    <div class="admin-stat-label">In Stock</div>
+                    <div class="admin-stat-value" id="aViewStock">0</div>
+                </div>
+                <div class="admin-stat-box">
+                    <div class="admin-stat-label">Total Sold</div>
+                    <div class="admin-stat-value" id="aViewSold">0</div>
+                </div>
+            </div>
+
+            <p style="color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; font-size: 0.9rem;">
+                Product ID: <span id="aViewId" style="font-family: monospace; color: var(--text-main);"></span>
+            </p>
+
+            <div class="admin-modal-actions">
+                <button class="admin-btn-delete" onclick="deleteFromViewModal()">Delete Product</button>
+                <button class="admin-btn-edit" onclick="editFromViewModal()">Edit Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let currentViewId = null;
+
 // Sidebar Logic
 function toggleSidebarCollapse() {
     const sidebar = document.getElementById('sidebar');
@@ -678,8 +783,10 @@ function addMedicine(){
     const quantity = document.getElementById('medQuantity').value;
     const category = document.getElementById('medCategory').value;
     const image = document.getElementById('medImage').value;
+    const description = document.getElementById('medDescription').value; // NEW
+
     if(!name || !price || !quantity) { alert("Please fill required fields"); return; }
-    fetch("/admin/add_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({name, price, quantity, category, image}) }).then(res => res.json()).then(data=>{ alert(data.message); if(data.message.includes("success")) location.reload(); });
+    fetch("/admin/add_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({name, price, quantity, category, image, description}) }).then(res => res.json()).then(data=>{ alert(data.message); if(data.message.includes("success")) location.reload(); });
 }
 function deleteMedicine(id){
     if(confirm("Delete this medicine?")){ fetch("/admin/delete_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id}) }).then(res => res.json()).then(data=>{ alert(data.message); location.reload(); }); }
@@ -692,6 +799,7 @@ function openEditModal(btn){
     document.getElementById('editMedQuantity').value = tr.dataset.quantity;
     document.getElementById('editMedCategory').value = tr.dataset.category;
     document.getElementById('editMedImage').value = tr.dataset.image;
+    document.getElementById('editMedDescription').value = tr.dataset.description || ""; // NEW
     document.getElementById('editModal').style.display = 'flex';
 }
 function closeEditModal(){ document.getElementById('editModal').style.display = 'none'; }
@@ -702,7 +810,9 @@ function saveEditMedicine(){
     const quantity = document.getElementById('editMedQuantity').value;
     const category = document.getElementById('editMedCategory').value;
     const image = document.getElementById('editMedImage').value;
-    fetch("/admin/edit_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id, name, price, quantity, category, image}) }).then(res=>res.json()).then(data=>{ alert(data.message); location.reload(); });
+    const description = document.getElementById('editMedDescription').value; // NEW
+
+    fetch("/admin/edit_medicine", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id, name, price, quantity, category, image, description}) }).then(res => res.json()).then(data=>{ alert(data.message); location.reload(); });
 }
 
 // Deals CRUD
@@ -747,6 +857,70 @@ document.getElementById('medSearch').addEventListener('input', function(e) {
 // VIP Modal Logic
 function openVipModal() { document.getElementById('vipModal').style.display = 'flex'; }
 function closeVipModal() { document.getElementById('vipModal').style.display = 'none'; }
+
+// --- ADMIN VIEW MODAL LOGIC ---
+function openAdminViewModal(id) {
+    currentViewId = id;
+    fetch(`/api/medicine/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) {
+                alert("Error loading product");
+                return;
+            }
+            document.getElementById('aViewId').textContent = data._id;
+            document.getElementById('aViewName').textContent = data.name;
+            document.getElementById('aViewCategory').textContent = data.category;
+            document.getElementById('aViewPrice').textContent = `$${data.price}`;
+            document.getElementById('aViewImage').src = data.image || '/static/images/default.png';
+            
+            // --- UPDATED: Handle Description ---
+            const descEl = document.getElementById('aViewDesc');
+            if(data.description && data.description.trim() !== "") {
+                descEl.textContent = data.description;
+            } else {
+                descEl.textContent = "No description available.";
+            }
+            
+            const stockEl = document.getElementById('aViewStock');
+            stockEl.textContent = data.quantity;
+            stockEl.style.color = data.quantity === 0 ? 'var(--danger)' : (data.quantity < 10 ? 'var(--warning)' : 'var(--success)');
+            
+            document.getElementById('aViewSold').textContent = data.sold || 0;
+            
+            document.getElementById('adminProductModal').style.display = 'flex';
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Network error");
+        });
+}
+
+function closeAdminViewModal() {
+    document.getElementById('adminProductModal').style.display = 'none';
+    currentViewId = null;
+}
+
+function deleteFromViewModal() {
+    if(currentViewId && confirm("Are you sure you want to delete this product?")) {
+        closeAdminViewModal();
+        deleteMedicine(currentViewId);
+    }
+}
+
+function editFromViewModal() {
+    if(currentViewId) {
+        // Find TR in table to populate edit modal
+        const tr = document.querySelector(`tr[data-id="${currentViewId}"]`);
+        if(tr) {
+            closeAdminViewModal();
+            openEditModal(tr.querySelector('.btn-edit'));
+        } else {
+            alert("Could not find product in current view. Refreshing...");
+            location.reload();
+        }
+    }
+}
 
 // Charts & Top Users Logic
 fetch("/admin/dashboard_data").then(res => res.json()).then(data => {
